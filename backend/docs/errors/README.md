@@ -26,6 +26,15 @@ Error: P1001: Can't reach database server at localhost:1433
 
 ---
 
+#### [ERROR-FOREIGN-KEY.md](ERROR-FOREIGN-KEY.md) - Foreign Key Constraint Violated 🔥 HOT
+```
+Foreign key constraint violated on the constraint: 'User_roleId_fkey'
+```
+**Penyebab:** Database belum di-seed, tabel `Role` kosong, tidak ada roleId yang valid  
+**Solusi:** Jalankan `npm run db:seed` untuk create roles default
+
+---
+
 ### General Errors
 
 #### [ERROR-EPERM.md](ERROR-EPERM.md) - Operation Not Permitted ⚡ HOT
@@ -95,6 +104,7 @@ node test-connection.js
 - **P1001?** → Enable TCP/IP, set port 1433 → [Guide](ERROR-P1001.md)
 - **P1000?** → Buat user dengan `setup-sql-login.sql` → [Guide](ERROR-P1000.md)
 - **EPERM?** → Stop server, kill Node.js, delete `.prisma` → [Guide](ERROR-EPERM.md)
+- **Foreign Key?** → Seed database dengan `npm run db:seed` → [Guide](ERROR-FOREIGN-KEY.md)
 
 ### 5. **Verify Fix**
 ```powershell

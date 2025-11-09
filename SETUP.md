@@ -4,6 +4,32 @@ Panduan lengkap untuk menjalankan project ini dari awal (setelah clone dari GitH
 
 ---
 
+## ⚡ Quick Start (TL;DR)
+
+**Sudah setup SQL Server & punya user `prisma_user`?** Jalankan ini:
+
+```powershell
+# 1. Clone & install
+git clone https://github.com/Bar-innutshell/Management-Karyawan.git
+cd Management-Karyawan/backend
+npm install
+
+# 2. Setup .env (edit dengan credentials kamu)
+copy .env.example .env
+
+# 3. Setup database
+npx prisma db push
+npx prisma generate
+npm run db:seed          # ⚠️ PENTING: Seed data default!
+
+# 4. Run server
+npm run dev
+```
+
+**Belum setup SQL Server?** Ikuti langkah lengkap di bawah! 👇
+
+---
+
 ## 📋 Prerequisites
 
 Pastikan sudah terinstall:
@@ -157,15 +183,36 @@ npx prisma generate
 
 #### Seed Database dengan Data Awal
 
-Gunakan script test sebelum run server:
+**PENTING:** Sebelum run server, seed database dengan data default!
+
 ```powershell
-node test-db.js
+npm run db:seed
 ```
 
 Expected output:
 ```
-✅ Connected to SQL Server
-✅ Query result: { db: 'db_restoran', server: 'NAMA-PC' }
+🌱 Starting seed...
+✅ Roles seeded successfully!
+✅ Admin user created successfully!
+🎉 Database seeded successfully!
+```
+
+**Script ini akan membuat:**
+- 3 Roles default: Admin, Kasir, Koki
+- 1 Admin user default:
+  - Email: `admin@admin.com`
+  - Password: `admin123`
+  - Role: Admin
+
+> ⚠️ **JANGAN SKIP LANGKAH INI!** Jika tidak seed:
+> - Database kosong, tidak ada roles
+> - API `/auth/register` akan error: `Foreign key constraint violated on the constraint: 'User_roleId_fkey'`
+> - Tidak bisa register user baru karena roleId tidak ada
+> - Solusi: Jalankan `npm run db:seed` sekarang!
+
+**Test koneksi (optional):**
+```powershell
+node test-db.js
 ```
 
 #### Jalankan Server
