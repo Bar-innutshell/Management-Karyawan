@@ -10,6 +10,7 @@ import '../../features/payroll/screen/salary_info_screen.dart';
 import '../../features/payroll/screen/salary_detail_screen.dart';
 import '../../features/admin_panel/screen/manage_user_list_screen.dart';
 import '../../features/admin_panel/screen/manage_user_detail_screen.dart';
+import '../../features/reporting/screen/admin_screen.dart';
 
 class Routes {
   static const splash = '/splash';
@@ -23,6 +24,7 @@ class Routes {
   static const salaryDetail = '/admin/dashboard/informasi-gaji/detail';
   static const userList = '/admin/dashboard/informasi-karyawan';
   static const userDetail = '/admin/dashboard/informasi-karyawan/detail';
+  static const adminReport = '/admin/dashboard/laporan';
 }
 
 class AppPages {
@@ -41,5 +43,6 @@ class AppPages {
       name: Routes.userDetail,
       page: () => const ManageUserDetailScreen(),
     ),
+    GetPage(name: Routes.adminReport, page: () => const AdminReportScreen()),
   ];
 }

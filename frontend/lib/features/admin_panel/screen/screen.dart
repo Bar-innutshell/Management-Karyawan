@@ -39,9 +39,7 @@ class AdminPanelScreen extends StatelessWidget {
             ListTile(
               title: const Text('View Reports'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // TODO: Navigate to reports
-              },
+              onTap: () => Get.toNamed(Routes.adminReport),
             ),
           ],
         ),

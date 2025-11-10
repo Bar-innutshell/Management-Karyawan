@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../controllers/controller.dart';
-import '../../../../core/models/report.dart';
 
 class AdminReportScreen extends StatefulWidget {
   const AdminReportScreen({super.key});
@@ -95,9 +94,11 @@ class _AdminReportScreenState extends State<AdminReportScreen> {
                         }
                       },
                       icon: const Icon(Icons.date_range),
-                      label: Text(_selectedDate == null
-                          ? 'Pilih Tanggal'
-                          : _dateFormat.format(_selectedDate!)),
+                      label: Text(
+                        _selectedDate == null
+                            ? 'Pilih Tanggal'
+                            : _dateFormat.format(_selectedDate!),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal,
                         shape: RoundedRectangleBorder(
@@ -111,9 +112,18 @@ class _AdminReportScreenState extends State<AdminReportScreen> {
                       hint: const Text("Pilih Shift"),
                       value: _selectedShift,
                       items: const [
-                        DropdownMenuItem(value: 'Pagi', child: Text("Shift Pagi")),
-                        DropdownMenuItem(value: 'Siang', child: Text("Shift Siang")),
-                        DropdownMenuItem(value: 'Malam', child: Text("Shift Malam")),
+                        DropdownMenuItem(
+                          value: 'Pagi',
+                          child: Text("Shift Pagi"),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Siang',
+                          child: Text("Shift Siang"),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Malam',
+                          child: Text("Shift Malam"),
+                        ),
                       ],
                       onChanged: (val) async {
                         setState(() => _selectedShift = val);
@@ -144,39 +154,41 @@ class _AdminReportScreenState extends State<AdminReportScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _controller.reports.isEmpty
-                      ? const Center(
-                          child: Text(
-                            "Belum ada laporan pemasukan",
-                            style: TextStyle(color: Colors.grey),
+                  ? const Center(
+                      child: Text(
+                        "Belum ada laporan pemasukan",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _controller.reports.length,
+                      itemBuilder: (context, index) {
+                        final report = _controller.reports[index];
+                        return Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _controller.reports.length,
-                          itemBuilder: (context, index) {
-                            final report = _controller.reports[index];
-                            return Card(
-                              elevation: 2,
-                              margin: const EdgeInsets.symmetric(vertical: 6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.receipt_long,
+                              color: Colors.teal,
+                            ),
+                            title: Text(
+                              "Rp ${report.jumlahPemasukan.toStringAsFixed(0)}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
-                              child: ListTile(
-                                leading: const Icon(Icons.receipt_long,
-                                    color: Colors.teal),
-                                title: Text(
-                                  "Rp ${report.jumlahPemasukan.toStringAsFixed(0)}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  "${_dateFormat.format(report.tanggalLaporan)} | Shift: ${report.shift}\nKasir: ${report.user}",
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                            ),
+                            subtitle: Text(
+                              "${_dateFormat.format(report.tanggalLaporan)} | Shift: ${report.shift}\nKasir: ${report.user}",
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
