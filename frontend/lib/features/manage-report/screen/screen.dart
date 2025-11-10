@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-// ===== Schedule Screen =====
-class ScheduleScreen extends StatelessWidget {
-  const ScheduleScreen({super.key});
+// ===== ManageReport Screen =====
+class ManageReportScreen extends StatelessWidget {
+  const ManageReportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Schedule")),
+      appBar: AppBar(title: const Text("Manage Report")),
       body: const Center(
         child: Text(
-          "Hello World - Schedule Screen",
+          "Hello World - Manage Report Screen",
           style: TextStyle(fontSize: 20),
         ),
       ),

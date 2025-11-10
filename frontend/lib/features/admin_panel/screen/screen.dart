@@ -1,48 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../../core/config/routes.dart';
 
 class AdminPanelScreen extends StatelessWidget {
   const AdminPanelScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final String userName = "Nama Admin";
+    final String userRole = "Admin";
+
+    const Color bgColor = Color(0xFF0F172A);
+    const Color cardColor = Color(0xFF1E293B);
+    const Color textPrimary = Colors.white;
+    const Color textSecondary = Color(0xFFCBD5E1);
+    const Color accentRed = Color(0xFFEF4444);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Admin Dashboard')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: [
-            ListTile(
-              title: const Text('Informasi Karyawan'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => Get.toNamed(Routes.userList),
-            ),
-            ListTile(
-              title: const Text('Informasi Gaji'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => Get.toNamed(Routes.salaryInfo),
-            ),
-            // TODO: Schedule feature - waiting for backend implementation
-            // ListTile(
-            //   title: const Text('Manage Jadwal'),
-            //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            //   onTap: () => Get.toNamed(Routes.manageSchedule),
-            // ),
-            ListTile(
-              title: const Text('Manage Roles'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // TODO: Navigate to roles
-              },
-            ),
-            ListTile(
-              title: const Text('View Reports'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // TODO: Navigate to reports
-              },
-            ),
+          children: const [
+            ListTile(title: Text('Manage Users')),
+            ListTile(title: Text('Manage Schedules')),
+            ListTile(title: Text('Manage Roles')),
+            ListTile(title: Text('Payroll / Bonuses')),
+            ListTile(title: Text('View Reports')),
           ],
         ),
       ),

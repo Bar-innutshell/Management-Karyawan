@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/config/routes.dart';
+import '../../../../core/config/routes.dart';
 
-class EmployeeScreen extends StatelessWidget {
-  const EmployeeScreen({super.key});
+class CashierScreen extends StatelessWidget {
+  const CashierScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final String userName = "Nama Lengkap";
-    final String userRole = "Employee";
+    final String userName = "Nama Cashier"; // placeholder
+    final String userRole = "Cashier";
 
     const Color bgColor = Color(0xFF0F172A);
     const Color cardColor = Color(0xFF1E293B);
     const Color textPrimary = Colors.white;
     const Color textSecondary = Color(0xFFCBD5E1);
-    const Color accentBlue = Color(0xFF3B82F6);
+    const Color accentGreen = Color(0xFF22C55E);
 
     return Scaffold(
       body: Container(
@@ -39,7 +39,7 @@ class EmployeeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // kiri: Nama dan Role
+                    // kiri: Nama & Role
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,10 +61,10 @@ class EmployeeScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
-                            vertical: 4,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: accentBlue.withOpacity(0.2),
+                            color: accentGreen.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -78,7 +78,7 @@ class EmployeeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // kanan: Log Out
+                    // kanan: Log Out dengan outline merah
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.red, width: 1),
@@ -90,11 +90,11 @@ class EmployeeScreen extends StatelessWidget {
                           Get.offAllNamed(Routes.auth);
                         },
                         style: TextButton.styleFrom(
+                          backgroundColor: cardColor,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 6,
                           ),
-                          backgroundColor: cardColor,
                         ),
                         child: const Text(
                           "Log Out",
@@ -122,13 +122,14 @@ class EmployeeScreen extends StatelessWidget {
                           child: AspectRatio(
                             aspectRatio: 16 / 9,
                             child: Image.asset(
-                              'assets/coe.png',
+                              'assets/jalan.png',
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 16),
 
                     const Padding(
@@ -136,7 +137,7 @@ class EmployeeScreen extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Menu Employee",
+                          "Menu Cashier",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -148,13 +149,14 @@ class EmployeeScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    // ===== MENU CARDS DENGAN ROUTING =====
+                    // ===== MENU CARDS DUMMY =====
                     _buildMenuCard(
                       context,
                       icon: Icons.calendar_today,
                       title: "Lihat Jadwal",
                       description: "Lihat detail jadwal kerja mu.",
                       routeName: Routes.schedule,
+                      accentColor: accentGreen,
                     ),
                     _buildMenuCard(
                       context,
@@ -162,6 +164,7 @@ class EmployeeScreen extends StatelessWidget {
                       title: "Absensi Harian",
                       description: "Cek dan catat kehadiran kamu setiap hari.",
                       routeName: Routes.attendance,
+                      accentColor: accentGreen,
                     ),
                     _buildMenuCard(
                       context,
@@ -169,6 +172,15 @@ class EmployeeScreen extends StatelessWidget {
                       title: "Cek Gaji",
                       description: "Lihat detail gaji dan tunjangan bulanan.",
                       routeName: Routes.payroll,
+                      accentColor: accentGreen,
+                    ),
+                    _buildMenuCard(
+                      context,
+                      icon: Icons.note_alt,
+                      title: "Kirim Laporan (Kasir)",
+                      description: "Kirim laporan harian untuk bagian kasir.",
+                      routeName: Routes.reporting,
+                      accentColor: accentGreen,
                     ),
 
                     const SizedBox(height: 12),
@@ -189,18 +201,17 @@ class EmployeeScreen extends StatelessWidget {
     );
   }
 
-  // ===== MENU CARD W/ ROUTING =====
   Widget _buildMenuCard(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String description,
     required String routeName,
+    required Color accentColor,
   }) {
     const Color cardColor = Color(0xFF1E293B);
     const Color textPrimary = Colors.white;
     const Color textSecondary = Color(0xFFCBD5E1);
-    const Color accentBlue = Color(0xFF3B82F6);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -227,10 +238,10 @@ class EmployeeScreen extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: accentBlue.withOpacity(0.18),
+                color: accentColor.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: accentBlue),
+              child: Icon(icon, color: accentColor),
             ),
             const SizedBox(width: 16),
             Expanded(
