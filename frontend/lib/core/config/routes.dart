@@ -10,11 +10,10 @@ import '../../features/manage-report/screen/screen.dart';
 import '../../features/manage-schedule/screen/screen.dart';
 import '../../features/manage-users/screen/screen.dart';
 import '../../features/employee/screen/screen.dart';
-import '../../features/cashier/screen/screen.dart'; // <-- import CashierScreen
-import '../../features/schedule/screen/screen.dart';
-import '../../features/payroll/screen/screen.dart';
-import '../../features/reporting/screen/screen.dart';
-import '../../features/attendance/screen/screen.dart';
+import '../../features/payroll/screen/salary_info_screen.dart';
+import '../../features/payroll/screen/salary_detail_screen.dart';
+import '../../features/admin_panel/screen/manage_user_list_screen.dart';
+import '../../features/admin_panel/screen/manage_user_detail_screen.dart';
 
 // ===== Definisi Nama Routes =====
 class Routes {
@@ -25,19 +24,10 @@ class Routes {
   // Admin & Employee Dashboard
   static const adminDashboard = '/dashboard/admin';
   static const employeeDashboard = '/dashboard/employee';
-  static const cashierDashboard = '/dashboard/cashier'; // <-- route baru
-
-  // Admin Sub-pages (nested under /dashboard/admin)
-  static const manageUser = '$adminDashboard/manage-user';
-  static const manageSchedule = '$adminDashboard/manage-schedule';
-  static const managePayroll = '$adminDashboard/manage-payroll';
-  static const manageReport = '$adminDashboard/manage-report';
-
-  // Employee Sub-pages
-  static const schedule = '$employeeDashboard/schedule';
-  static const attendance = '$employeeDashboard/attendance';
-  static const payroll = '$employeeDashboard/payroll';
-  static const reporting = '$employeeDashboard/reporting';
+  static const salaryInfo = '/admin/dashboard/informasi-gaji';
+  static const salaryDetail = '/admin/dashboard/informasi-gaji/detail';
+  static const userList = '/admin/dashboard/informasi-karyawan';
+  static const userDetail = '/admin/dashboard/informasi-karyawan/detail';
 }
 
 // ===== Definisi Halaman untuk Setiap Route =====
@@ -51,26 +41,12 @@ class AppPages {
     // Dashboard
     GetPage(name: Routes.adminDashboard, page: () => const AdminPanelScreen()),
     GetPage(name: Routes.employeeDashboard, page: () => const EmployeeScreen()),
+    GetPage(name: Routes.salaryInfo, page: () => const SalaryInfoScreen()),
+    GetPage(name: Routes.salaryDetail, page: () => const SalaryDetailScreen()),
+    GetPage(name: Routes.userList, page: () => const ManageUserListScreen()),
     GetPage(
-      name: Routes.cashierDashboard,
-      page: () => const CashierScreen(),
-    ), // <-- GetPage baru
-    // Halaman turunan Admin (nested)
-    GetPage(name: Routes.manageUser, page: () => const ManageUserScreen()),
-    GetPage(
-      name: Routes.manageSchedule,
-      page: () => const ManageScheduleScreen(),
+      name: Routes.userDetail,
+      page: () => const ManageUserDetailScreen(),
     ),
-    GetPage(
-      name: Routes.managePayroll,
-      page: () => const ManagePayrollScreen(),
-    ),
-    GetPage(name: Routes.manageReport, page: () => const ManageReportScreen()),
-
-    // Halaman turunan Employee / minimal Hello World
-    GetPage(name: Routes.schedule, page: () => const ScheduleScreen()),
-    GetPage(name: Routes.payroll, page: () => const PayrollScreen()),
-    GetPage(name: Routes.reporting, page: () => const ReportingScreen()),
-    GetPage(name: Routes.attendance, page: () => const AttendanceScreen()),
   ];
 }
