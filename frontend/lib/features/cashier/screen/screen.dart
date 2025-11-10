@@ -7,14 +7,14 @@ class CashierScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String userName = "Nama Cashier"; // nanti bisa di-bind ke database
+    final String userName = "Nama Cashier"; // placeholder
     final String userRole = "Cashier";
 
     const Color bgColor = Color(0xFF0F172A);
     const Color cardColor = Color(0xFF1E293B);
     const Color textPrimary = Colors.white;
     const Color textSecondary = Color(0xFFCBD5E1);
-    const Color accentGreen = Color(0xFF22C55E); // hijau untuk cashier
+    const Color accentGreen = Color(0xFF22C55E);
 
     return Scaffold(
       body: Container(
@@ -39,7 +39,7 @@ class CashierScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // kiri
+                    // kiri: Nama & Role
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +61,7 @@ class CashierScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
-                            vertical: 4,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
                             color: accentGreen.withOpacity(0.2),
@@ -78,31 +78,36 @@ class CashierScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // kanan: Log Out
-                    TextButton(
-                      onPressed: () {
-                        Get.offAllNamed(Routes.auth);
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        backgroundColor: cardColor,
+                    // kanan: Log Out dengan outline merah
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.red, width: 1),
+                        borderRadius: BorderRadius.circular(6),
+                        color: cardColor,
                       ),
-                      child: const Text(
-                        "Log Out",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
+                      child: TextButton(
+                        onPressed: () {
+                          Get.offAllNamed(Routes.auth);
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: cardColor,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                        ),
+                        child: const Text(
+                          "Log Out",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 20),
 
               // ===== KONTEN =====
               Expanded(
@@ -124,6 +129,7 @@ class CashierScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 16),
 
                     const Padding(
@@ -140,9 +146,18 @@ class CashierScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 12),
 
-                    // ===== MENU CARDS DENGAN ROUTING =====
+                    // ===== MENU CARDS DUMMY =====
+                    _buildMenuCard(
+                      context,
+                      icon: Icons.calendar_today,
+                      title: "Lihat Jadwal",
+                      description: "Lihat detail jadwal kerja mu.",
+                      routeName: Routes.schedule,
+                      accentColor: accentGreen,
+                    ),
                     _buildMenuCard(
                       context,
                       icon: Icons.access_time,
@@ -186,7 +201,6 @@ class CashierScreen extends StatelessWidget {
     );
   }
 
-  // ===== MENU CARD W/ ROUTING =====
   Widget _buildMenuCard(
     BuildContext context, {
     required IconData icon,

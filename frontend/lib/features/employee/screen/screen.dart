@@ -78,7 +78,7 @@ class EmployeeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // kanan: Log Out dengan outline merah
+                    // kanan: Log Out
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.red, width: 1),
@@ -169,13 +169,6 @@ class EmployeeScreen extends StatelessWidget {
                       title: "Cek Gaji",
                       description: "Lihat detail gaji dan tunjangan bulanan.",
                       routeName: Routes.payroll,
-                    ),
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.note_alt,
-                      title: "Kirim Laporan (Kasir)",
-                      description: "Kirim laporan harian untuk bagian kasir.",
-                      routeName: Routes.reporting,
                     ),
 
                     const SizedBox(height: 12),
