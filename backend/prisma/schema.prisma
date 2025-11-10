@@ -26,7 +26,7 @@ model User {
   roleId           Int
   createdAt        DateTime           @default(now())
   gajiPerJam       Float              @default(0)
-  updatedAt        DateTime           @default(now()) @updatedAt
+  updatedAt        DateTime           @default(now())
   absensi          Absensi[]
   jadwal           Jadwal[]
   laporanPemasukan LaporanPemasukan[]
@@ -57,7 +57,7 @@ model Absensi {
   status          String    @default("Hadir")
   tanggal         DateTime  @default(now()) @db.Date
   totalGaji       Float     @default(0)
-  updatedAt       DateTime  @default(now()) @updatedAt
+  updatedAt       DateTime  @default(now())
   user            User      @relation(fields: [userId], references: [id])
 }
 

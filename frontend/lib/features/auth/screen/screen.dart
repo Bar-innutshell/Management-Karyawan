@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../controllers/controller.dart';
-import '../../../core/widgets/custom_text_field.dart'; 
-import '../../../core/widgets/button.dart'; 
+import '../../../core/config/app_theme.dart';
+import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/widgets/button.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -106,15 +107,31 @@ class AuthScreen extends StatelessWidget {
                                     // Logika Validasi & Login
                                     final email = emailController.text.trim();
                                     final password = passwordController.text;
+
                                     if (email.isEmpty || password.isEmpty) {
                                       Get.snackbar(
-                                        'Validation',
-                                        'Email and password are required',
-                                        backgroundColor: Colors.red[800],
-                                        colorText: Colors.white,
+                                        'Validasi Error',
+                                        'Email dan password tidak boleh kosong',
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        backgroundColor: AppTheme.error
+                                            .withOpacity(0.9),
+                                        colorText: AppTheme.textPrimary,
                                       );
                                       return;
                                     }
+
+                                    if (!GetUtils.isEmail(email)) {
+                                      Get.snackbar(
+                                        'Validasi Error',
+                                        'Format email tidak valid',
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        backgroundColor: AppTheme.error
+                                            .withOpacity(0.9),
+                                        colorText: AppTheme.textPrimary,
+                                      );
+                                      return;
+                                    }
+
                                     controller.login(email, password);
                                   },
                                 ),

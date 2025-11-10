@@ -2,20 +2,22 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../core/config/routes.dart';
+import '../../../core/config/app_theme.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/models/user.dart';
 
 class AuthController extends GetxController {
-  final ApiService _apiService = ApiService();
-  final StorageService _storage = StorageService();
+  // Use Get.find() for dependency injection
+  final ApiService _apiService = Get.find<ApiService>();
+  final StorageService _storage = Get.find<StorageService>();
 
-  //state loading
-  var isLoading = false.obs;
-  //state role
-  var userRole = ''.obs;
-  //state user
-  final currentUser = Rxn<User>();
+  // State loading
+  final RxBool isLoading = false.obs;
+  // State role
+  final RxString userRole = ''.obs;
+  // State user
+  final Rxn<User> currentUser = Rxn<User>();
 
   Future<void> login(String email, String password) async {
     try {
@@ -25,52 +27,73 @@ class AuthController extends GetxController {
       final token = data['token'] as String?;
       debugPrint('AuthController.login: token: $token');
       if (token == null) {
-        Get.snackbar('Login gagal', 'Token tidak diterima');
+        Get.snackbar(
+          'Login Gagal',
+          'Token tidak diterima dari server',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppTheme.error.withOpacity(0.9),
+          colorText: AppTheme.textPrimary,
+        );
         return;
       }
 
-      //fitur decode token
+      // Fitur decode token
       final payload = _apiService.decodeJwtPayload(token);
       debugPrint('AuthController.login: decoded token payload: $payload');
-      final roleId = payload?['roleId'] ?? payload?['role_id'];
 
-      //fitur simpan user
-      await _storage.saveUserJson(jsonEncode(payload ?? {}));
-      final u = payload != null ? User.fromJwtPayload(payload) : null;
+      if (payload == null) {
+        Get.snackbar(
+          'Login Gagal',
+          'Token tidak valid',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppTheme.error.withOpacity(0.9),
+          colorText: AppTheme.textPrimary,
+        );
+        return;
+      }
+
+      final roleId = payload['roleId'] ?? payload['role_id'];
+
+      // Fitur simpan user
+      await _storage.saveUserJson(jsonEncode(payload));
+      final u = User.fromJwtPayload(payload);
       currentUser.value = u;
 
-      //fitur ambil role
+      // Fitur ambil role
       String roleName = '';
       if (roleId != null) {
-        final roleResp = await _apiService.getRoleById(
-          int.parse(roleId.toString()),
-        );
-        debugPrint('AuthController.login: roleResp: $roleResp');
-        if (roleResp != null) {
-          final roleData = roleResp['data'] ?? roleResp;
-          roleName =
-              roleData['nama']?.toString() ??
-              roleData['name']?.toString() ??
-              '';
+        final role = await _apiService.fetchRole(int.parse(roleId.toString()));
+        debugPrint('AuthController.login: role: $role');
+        if (role != null) {
+          roleName = role.nama ?? '';
         }
       }
 
-      //fitur simpan role dan navigasi
+      // Fitur simpan role dan navigasi
       userRole.value = roleName;
 
       final rn = roleName.toLowerCase();
       if (rn == 'admin') {
         Get.offAllNamed(Routes.adminDashboard);
       } else if (rn == 'cashier' || rn == 'kasir') {
-        Get.offAllNamed(Routes.employeeDashboard); 
+        Get.offAllNamed(Routes.employeeDashboard);
       } else {
         Get.offAllNamed(Routes.employeeDashboard);
       }
     } catch (e) {
+      debugPrint('AuthController.login error: $e');
       final msg = e is Exception
           ? e.toString().replaceFirst('Exception: ', '')
-          : 'Login gagal';
-      Get.snackbar('Login error', msg);
+          : 'Login gagal. Silakan coba lagi.';
+
+      Get.snackbar(
+        'Login Error',
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppTheme.error.withOpacity(0.9),
+        colorText: AppTheme.textPrimary,
+        duration: const Duration(seconds: 3),
+      );
     } finally {
       isLoading.value = false;
     }

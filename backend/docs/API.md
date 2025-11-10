@@ -11,6 +11,10 @@ Catatan: Tambahkan endpoint baru di dokumen ini setiap menambah route di `backen
   - 📊 Laporan Pemasukkan (Admin)
   - 💰 Manajemen Gaji (Admin)
   - ⏰ Sistem Absensi (All Users)
+- **[Slip Gaji Guide](./SLIP-GAJI-GUIDE.md)** - Panduan lengkap Slip Gaji:
+  - 💵 Generate Slip Gaji Bulanan (Admin)
+  - 📋 View Slip Gaji (User & Admin)
+  - 🧮 Auto-calculate: Bonus, Potongan, Total Gaji Bersih
 
 ---
 
@@ -41,6 +45,11 @@ Catatan: Tambahkan endpoint baru di dokumen ini setiap menambah route di `backen
 - `POST /gaji/hitung-dari-gaji-pokok` - Hitung gaji per jam dari gaji pokok
 - `GET /gaji/user/:userId` - Lihat gaji user tertentu
 - `GET /gaji/all` - Lihat gaji semua user
+
+### Slip Gaji 💵
+- `POST /gaji/slip/generate` - Generate slip gaji bulanan (Admin only)
+- `GET /gaji/slip/user/:userId` - Lihat slip gaji user (User own, Admin all)
+- `GET /gaji/slip/all` - Lihat semua slip gaji (Admin only)
 
 ### Absensi ⏰
 - `POST /absensi/clock-in` - Absen masuk (All users)
@@ -444,6 +453,290 @@ Health check koneksi database.
 - Test koneksi: `node test-db.js`
 - Verifikasi `.env` credentials
 - Pastikan SQL Server running dan port 1433 accessible
+
+---
+
+## 💵 Slip Gaji (Monthly Salary Slip)
+
+**Slip Gaji** adalah rekap gaji bulanan yang dibuat Admin setiap akhir bulan berdasarkan akumulasi data absensi.
+
+**📖 Full Documentation:** [SLIP-GAJI-GUIDE.md](./SLIP-GAJI-GUIDE.md)
+
+### POST /gaji/slip/generate
+Generate slip gaji bulanan untuk seorang karyawan (Admin only).
+
+**Headers:**
+```
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "userId": 3,
+  "bulan": 10,
+  "tahun": 2025,
+  "bonusKehadiran": 200000,
+  "bonusLainnya": 100000,
+  "potonganLainnya": 0,
+  "keterangan": "Gaji Oktober 2025 - Performa bagus"
+}
+```
+
+**Field Descriptions:**
+- `userId` (number, required): ID karyawan
+- `bulan` (number, required): Bulan (1-12)
+- `tahun` (number, required): Tahun
+- `bonusKehadiran` (number, optional): Bonus kehadiran (default: 0)
+- `bonusLainnya` (number, optional): Bonus lainnya, THR, achievement, etc (default: 0)
+- `potonganLainnya` (number, optional): Potongan manual, BPJS, pinjaman, etc (default: 0)
+- `keterangan` (string, optional): Catatan tambahan
+
+**Response 200 (OK):**
+```json
+{
+  "message": "Slip gaji berhasil dibuat",
+  "data": {
+    "slipGaji": {
+      "id": 1,
+      "userId": 3,
+      "bulan": 10,
+      "tahun": 2025,
+      "gajiBulanan": 3200000,
+      "bonusKehadiran": 200000,
+      "bonusLainnya": 100000,
+      "potonganAlpha": 0,
+      "potonganTelat": 50000,
+      "potonganLainnya": 0,
+      "totalGajiKotor": 3500000,
+      "totalPotongan": 50000,
+      "totalGajiBersih": 3450000,
+      "tanggalBayar": "2025-11-11T10:30:00.000Z",
+      "keterangan": "Gaji Oktober 2025 - Performa bagus",
+      "user": {
+        "nama": "Budi Santoso",
+        "email": "budi.chef@restoran.com",
+        "role": {
+          "nama": "Chef"
+        }
+      }
+    },
+    "detail": {
+      "periode": "10/2025",
+      "jumlahHadir": 20,
+      "jumlahAlpha": 0,
+      "totalAbsensi": 20
+    }
+  }
+}
+```
+
+**Response 400 (Bad Request - Slip sudah ada):**
+```json
+{
+  "message": "Slip gaji untuk Budi Santoso bulan 10/2025 sudah ada",
+  "data": {
+    "id": 1,
+    "userId": 3,
+    "bulan": 10,
+    "tahun": 2025
+  }
+}
+```
+
+**Response 400 (Bad Request - Data tidak lengkap):**
+```json
+{
+  "message": "userId, bulan, dan tahun harus diisi"
+}
+```
+
+**Response 400 (Bad Request - Bulan invalid):**
+```json
+{
+  "message": "Bulan harus antara 1-12"
+}
+```
+
+**Response 404 (Not Found):**
+```json
+{
+  "message": "User tidak ditemukan"
+}
+```
+
+**Catatan:**
+- System otomatis menghitung `gajiBulanan` dari akumulasi absensi status "Hadir"
+- `potonganAlpha` auto-calculated: jumlahAlpha × gajiHarian
+- `potonganTelat` auto-calculated: akumulasi dari semua absensi bulan itu
+- Slip gaji bersifat unique per user per bulan/tahun (tidak bisa duplicate)
+
+---
+
+### GET /gaji/slip/user/:userId
+Lihat slip gaji user tertentu. User bisa lihat slip sendiri, Admin bisa lihat semua.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Query Parameters (Optional):**
+- `bulan` (number): Filter berdasarkan bulan (1-12)
+- `tahun` (number): Filter berdasarkan tahun
+
+**Example Request:**
+```
+GET /gaji/slip/user/3?bulan=10&tahun=2025
+Authorization: Bearer <token>
+```
+
+**Response 200 (OK):**
+```json
+{
+  "message": "Data slip gaji berhasil diambil",
+  "data": [
+    {
+      "id": 1,
+      "userId": 3,
+      "bulan": 10,
+      "tahun": 2025,
+      "gajiBulanan": 3200000,
+      "bonusKehadiran": 200000,
+      "bonusLainnya": 100000,
+      "potonganAlpha": 0,
+      "potonganTelat": 50000,
+      "potonganLainnya": 0,
+      "totalGajiKotor": 3500000,
+      "totalPotongan": 50000,
+      "totalGajiBersih": 3450000,
+      "tanggalBayar": "2025-11-11T10:30:00.000Z",
+      "keterangan": "Gaji Oktober 2025 - Performa bagus",
+      "user": {
+        "nama": "Budi Santoso",
+        "email": "budi.chef@restoran.com",
+        "role": {
+          "nama": "Chef"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "totalSlip": 1
+  }
+}
+```
+
+**Response 403 (Forbidden - User trying to view other's slip):**
+```json
+{
+  "message": "Anda tidak memiliki akses untuk melihat slip gaji user lain"
+}
+```
+
+**Catatan:**
+- User biasa hanya bisa lihat slip gaji sendiri
+- Admin bisa lihat slip gaji siapapun
+- Data diurutkan berdasarkan tahun dan bulan terbaru
+
+---
+
+### GET /gaji/slip/all
+Lihat semua slip gaji dengan filter (Admin only).
+
+**Headers:**
+```
+Authorization: Bearer <admin_token>
+```
+
+**Query Parameters (Optional):**
+- `bulan` (number): Filter berdasarkan bulan (1-12)
+- `tahun` (number): Filter berdasarkan tahun
+- `userId` (number): Filter berdasarkan user tertentu
+
+**Example Request:**
+```
+GET /gaji/slip/all?bulan=10&tahun=2025
+Authorization: Bearer <admin_token>
+```
+
+**Response 200 (OK):**
+```json
+{
+  "message": "Data slip gaji berhasil diambil",
+  "data": [
+    {
+      "id": 1,
+      "userId": 3,
+      "bulan": 10,
+      "tahun": 2025,
+      "totalGajiBersih": 4417637,
+      "user": {
+        "nama": "Budi Santoso",
+        "email": "budi.chef@restoran.com",
+        "role": { "nama": "Chef" }
+      }
+    },
+    {
+      "id": 2,
+      "userId": 4,
+      "bulan": 10,
+      "tahun": 2025,
+      "totalGajiBersih": 1939112,
+      "user": {
+        "nama": "Dewi Lestari",
+        "email": "dewi.waiter@restoran.com",
+        "role": { "nama": "Waiter" }
+      }
+    }
+    // ... more slips
+  ],
+  "summary": {
+    "totalSlip": 7,
+    "totalGajiBersih": 22270109
+  }
+}
+```
+
+**Response 403 (Forbidden):**
+```json
+{
+  "message": "Akses ditolak. Hanya Admin yang bisa mengakses endpoint ini."
+}
+```
+
+**Catatan:**
+- Hanya Admin yang bisa akses endpoint ini
+- `summary.totalGajiBersih` = Total payroll yang harus dibayar
+- Data diurutkan berdasarkan tahun, bulan (desc), dan nama user (asc)
+
+---
+
+**📖 Formula Perhitungan Slip Gaji:**
+
+```
+gajiBulanan = Σ totalGaji dari semua absensi (status = Hadir)
+
+potonganAlpha = jumlahAlpha × (gajiPerJam × 6 jam)
+
+potonganTelat = Σ potonganGaji dari semua absensi
+
+totalGajiKotor = gajiBulanan + bonusKehadiran + bonusLainnya
+
+totalPotongan = potonganAlpha + potonganTelat + potonganLainnya
+
+totalGajiBersih = totalGajiKotor - totalPotongan
+```
+
+**🛠️ Test Script:**
+```bash
+# Generate slip gaji untuk semua karyawan
+node backend/prisma/generate-slip-gaji.js
+
+# Lihat test guide lengkap
+cat backend/TEST-SLIP-GAJI.md
+```
 
 ---
 
