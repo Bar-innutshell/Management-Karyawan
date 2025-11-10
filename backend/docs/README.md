@@ -10,16 +10,36 @@ Dokumentasi ini berisi API reference, aturan khusus (mis. field shift), panduan 
 - **[API.md](API.md)** — Kontrak endpoint dan contoh request/response
 - **[POSTMAN.md](POSTMAN.md)** — Panduan testing dengan Postman
 - **[SHIFT.md](SHIFT.md)** — Penjelasan field `shift` (nilai: `pagi`, `siang`, `malam`)
+- **[LAPORAN-GAJI-ABSENSI.md](LAPORAN-GAJI-ABSENSI.md)** — Penjelasan sistem laporan gaji dan absensi
+- **[SLIP-GAJI-GUIDE.md](SLIP-GAJI-GUIDE.md)** — Panduan lengkap sistem slip gaji bulanan
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — Proses kontribusi dan update dokumentasi
 - **[CHANGELOG.md](CHANGELOG.md)** — Riwayat perubahan
+
+### Setup & Onboarding
+- **[SETUP.md](SETUP.md)** — Panduan setup lengkap untuk teammate baru
+- **[QUICK-FIX.md](QUICK-FIX.md)** — Quick fixes untuk masalah umum
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — Troubleshooting panduan komprehensif
+
+### Testing & Tools
+- **[SEEDER-INFO.md](SEEDER-INFO.md)** — Panduan menggunakan database seeder
+- **[TEST-SLIP-GAJI.md](TEST-SLIP-GAJI.md)** — Test cases dan hasil generate slip gaji
+- **`../prisma/seed.js`** — Database seeder (8 users, 126 attendance, 42 income)
+- **`../prisma/generate-slip-gaji.js`** — Auto-generator slip gaji bulanan
 
 ### Error Troubleshooting
 - **[errors/](errors/)** — 📂 Folder error documentation
   - **[errors/README.md](errors/README.md)** — Index semua error dan tools
+  - **[errors/FIX-CREATEDAT-ERROR.md](errors/FIX-CREATEDAT-ERROR.md)** — Fix createdAt column error
   - **[errors/ERROR-P1001.md](errors/ERROR-P1001.md)** — Can't reach database server
   - **[errors/ERROR-P1000.md](errors/ERROR-P1000.md)** — Authentication failed
+  - **[errors/ERROR-EPERM.md](errors/ERROR-EPERM.md)** — Permission denied errors
+  - **[errors/ERROR-FOREIGN-KEY.md](errors/ERROR-FOREIGN-KEY.md)** — Foreign key constraint errors
+  - **[errors/MIGRATION-COMPLETE.md](errors/MIGRATION-COMPLETE.md)** — Migration completion guide
+  - **[errors/TOOLS-MIGRATION.md](errors/TOOLS-MIGRATION.md)** — Migration tools guide
 
-### Setup & Tools
+### SQL Migration Scripts
+- **`../add-user-timestamps.sql`** — Add createdAt/updatedAt to User table
+- **`../migrate-gaji-naming.sql`** — Migrate gaji field naming consistency
 - **`setup-sql-login.sql`** — Script buat user SQL Server otomatis
 - **`enable-sql-auth.ps1`** — Enable Mixed Authentication mode
 - **`grant-create-db.sql`** — Grant dbcreator permission
