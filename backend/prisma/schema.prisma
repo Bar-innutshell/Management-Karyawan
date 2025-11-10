@@ -14,7 +14,7 @@ model Role {
   createdAt        DateTime @default(now())
   deskripsi        String?
   updatedAt        DateTime @default(now()) @updatedAt
-  gajiPokokBulanan Float    @default(0, map: "DF__Role__gajiPokokB__0B91BA14")
+  gajiPokokBulanan Float    @default(0, map: "DF_RolegajiPokokB_0B91BA14")
   users            User[]
 }
 
@@ -62,24 +62,24 @@ model Absensi {
 }
 
 model SlipGaji {
-  id              Int      @id(map: "PK__SlipGaji__3213E83F2B37C9E9") @default(autoincrement())
+  id              Int      @id(map: "PK_SlipGaji_3213E83F2B37C9E9") @default(autoincrement())
   bulan           Int
   tahun           Int
   gajiBulanan     Float
-  bonusKehadiran  Float    @default(0, map: "DF__SlipGaji__bonusK__0F624AF8")
-  bonusLainnya    Float    @default(0, map: "DF__SlipGaji__bonusL__10566F31")
-  potonganAlpha   Float    @default(0, map: "DF__SlipGaji__potong__114A936A")
-  potonganTelat   Float    @default(0, map: "DF__SlipGaji__potong__123EB7A3")
-  potonganLainnya Float    @default(0, map: "DF__SlipGaji__potong__1332DBDC")
+  bonusKehadiran  Float    @default(0, map: "DF_SlipGajibonusK_0F624AF8")
+  bonusLainnya    Float    @default(0, map: "DF_SlipGajibonusL_10566F31")
+  potonganAlpha   Float    @default(0, map: "DF_SlipGajipotong_114A936A")
+  potonganTelat   Float    @default(0, map: "DF_SlipGajipotong_123EB7A3")
+  potonganLainnya Float    @default(0, map: "DF_SlipGajipotong_1332DBDC")
   totalGajiKotor  Float
   totalPotongan   Float
   totalGajiBersih Float
-  tanggalBayar    DateTime @default(now(), map: "DF__SlipGaji__tangga__14270015") @db.DateTime
+  tanggalBayar    DateTime @default(now(), map: "DF_SlipGajitangga_14270015") @db.DateTime
   keterangan      String?  @db.NVarChar(500)
   userId          Int
-  createdAt       DateTime @default(now(), map: "DF__SlipGaji__create__160F4887") @db.DateTime
-  updatedAt       DateTime @default(now(), map: "DF__SlipGaji__update__17036CC0") @updatedAt @db.DateTime
-  user            User     @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "FK__SlipGaji__userId__151B244E")
+  createdAt       DateTime @default(now(), map: "DF_SlipGajicreate_160F4887") @db.DateTime
+  updatedAt       DateTime @default(now(), map: "DF_SlipGajiupdate_17036CC0") @updatedAt @db.DateTime
+  user            User     @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "FK_SlipGajiuserId_151B244E")
 
   @@unique([userId, bulan, tahun])
 }

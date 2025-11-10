@@ -126,7 +126,7 @@ async function main() {
   }
 
   // ==================== ABSENSI HISTORY ====================
-  console.log('\n� Creating attendance history (last 30 days)...');
+  console.log('\n  Creating attendance history (last 30 days)...');
   
   const today = new Date();
   const thirtyDaysAgo = new Date(today);
@@ -197,22 +197,47 @@ async function main() {
       const tanggal = new Date(date);
       tanggal.setHours(0, 0, 0, 0);
       
-      await prisma.absensi.create({
-        data: {
-          userId: user.id,
-          tanggal: tanggal,
-          shift: shift,
-          jamMulaiShift: jamMulaiShift,
-          jamSelesaiShift: jamSelesaiShift,
-          jamMasuk: jamMasuk,
-          jamKeluar: jamKeluar,
-          jamKerja: jamKerja,
-          menitTerlambat: menitTelat,
-          potonganGaji: Math.round(potonganGaji),
-          totalGaji: Math.round(totalGaji),
-          status: 'Hadir'
+      // Try to create absensi with all fields
+      // Will work for both old schema (with jamMulaiShift) and new schema (without)
+      try {
+        await prisma.absensi.create({
+          data: {
+            userId: user.id,
+            tanggal: tanggal,
+            shift: shift,
+            jamMulaiShift: jamMulaiShift,
+            jamSelesaiShift: jamSelesaiShift,
+            jamMasuk: jamMasuk,
+            jamKeluar: jamKeluar,
+            jamKerja: jamKerja,
+            menitTerlambat: menitTelat,
+            potonganGaji: Math.round(potonganGaji),
+            totalGaji: Math.round(totalGaji),
+            status: 'Hadir'
+          }
+        });
+      } catch (error) {
+        // If jamMulaiShift/jamSelesaiShift doesn't exist, try without them
+        if (error.message.includes('Unknown argument jamMulaiShift') || 
+            error.message.includes('Unknown argument jamSelesaiShift')) {
+          await prisma.absensi.create({
+            data: {
+              userId: user.id,
+              tanggal: tanggal,
+              shift: shift,
+              jamMasuk: jamMasuk,
+              jamKeluar: jamKeluar,
+              jamKerja: jamKerja,
+              menitTerlambat: menitTelat,
+              potonganGaji: Math.round(potonganGaji),
+              totalGaji: Math.round(totalGaji),
+              status: 'Hadir'
+            }
+          });
+        } else {
+          throw error;
         }
-      });
+      }
       
       totalAbsensi++;
     }
@@ -224,7 +249,7 @@ async function main() {
   console.log('\n📌 Creating income reports (last 30 days)...');
   
   // Get cashier users
-  const cashiers = users.filter((u, i) => ['Cashier'].includes(usersData[i].role));
+  const cashiers = users.filter((_, i) => ['Cashier'].includes(usersData[i].role));
   
   let totalLaporan = 0;
   
@@ -268,7 +293,7 @@ async function main() {
   console.log('✨ SEED COMPLETED SUCCESSFULLY! ✨');
   console.log('═══════════════════════════════════════════════════\n');
   
-  console.log('� USERS CREATED:');
+  console.log('  USERS CREATED:');
   console.log('─────────────────────────────────────────────────');
   for (let i = 0; i < users.length; i++) {
     const userData = usersData[i];
