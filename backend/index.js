@@ -53,7 +53,7 @@ app.use("/pemasukkan", pemasukkanRoute);
 app.use("/laporan", laporanRoute);
 app.use("/gaji", gajiRoute);
 app.use("/absensi", absensiRoute);
-app.use("/schedules", scheduleRoute);
+app.use("/schedules", scheduleRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
