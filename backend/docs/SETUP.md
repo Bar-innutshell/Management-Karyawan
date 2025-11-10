@@ -83,17 +83,17 @@ Jalankan script setup:
 sqlcmd -S .\SQLEXPRESS -E -i "script.sql"
 
 # Buat login prisma_user
-sqlcmd -S .\SQLEXPRESS -E -i "backend\setup-sql-login.sql"
+sqlcmd -S .\SQLEXPRESS -E -i "backend\docs\errors\tools\setup-sql-login.sql"
 
 # Beri permission CREATE DATABASE (untuk Prisma migrate)
-sqlcmd -S .\SQLEXPRESS -E -i "backend\grant-create-db.sql"
+sqlcmd -S .\SQLEXPRESS -E -i "backend\docs\errors\tools\grant-create-db.sql"
 ```
 
 Atau jalankan manual di SSMS:
 1. File → Open → File...
 2. Pilih `script.sql` → Execute (F5)
-3. Pilih `backend\setup-sql-login.sql` → Execute (F5)
-4. Pilih `backend\grant-create-db.sql` → Execute (F5)
+3. Pilih `backend\docs\errors\tools\setup-sql-login.sql` → Execute (F5)
+4. Pilih `backend\docs\errors\tools\grant-create-db.sql` → Execute (F5)
 
 #### C. Verifikasi Koneksi
 
@@ -137,7 +137,7 @@ JWT_SECRET="kata_mamah_aku_sigma08953214371987"
 **WAJIB:** Jalankan test koneksi terlebih dahulu untuk memastikan SQL Server siap:
 
 ```powershell
-node test-connection.js
+node docs/errors/tools/test-connection.js
 ```
 
 Expected output jika sukses:
@@ -286,12 +286,12 @@ flutter run
 - Test koneksi: `sqlcmd -S localhost,1433 -U prisma_user -P "Prisma!2025" -Q "SELECT DB_NAME()"`
 
 ### Error: "Authentication failed"
-- Jalankan ulang `backend\setup-sql-login.sql`
+- Jalankan ulang `backend\docs\errors\tools\setup-sql-login.sql`
 - Pastikan Mixed Authentication mode aktif
 - Restart SQL Server service
 
 ### Error: "Shadow database permission denied"
-- Jalankan `backend\grant-create-db.sql`
+- Jalankan `backend\docs\errors\tools\grant-create-db.sql`
 - Atau pakai `npx prisma db push` (tidak butuh shadow DB)
 
 ### Error: "Failed to connect to localhost\SQLEXPRESS in 15000ms"

@@ -130,9 +130,16 @@ Atau matikan Windows Firewall sementara untuk test:
 
 ### 5. TEST KONEKSI KE SQL SERVER
 
-Sebelum jalankan Prisma, test koneksi dulu:
+Sebelum jalankan Prisma, test koneksi dulu menggunakan tool yang sudah disediakan:
 
-**Buat file `test-connection.js`:**
+**Jalankan test connection:**
+
+```powershell
+cd backend
+node docs/errors/tools/test-connection.js
+```
+
+Atau jika ingin buat manual, file `docs/errors/tools/test-connection.js` berisi:
 
 ```javascript
 const sql = require('mssql');
@@ -287,7 +294,7 @@ Pastikan semua ini sudah dilakukan:
 - [ ] User `prisma_user` exist dan punya permission
 - [ ] Database `db_restoran` exist
 - [ ] Connection string di `.env` benar
-- [ ] Test connection dengan `test-connection.js` berhasil
+- [ ] Test connection dengan `node docs/errors/tools/test-connection.js` berhasil
 
 ---
 
@@ -326,7 +333,7 @@ Setelah semua langkah di atas, jalankan:
 
 ```powershell
 # 1. Test koneksi
-node test-connection.js
+node docs/errors/tools/test-connection.js
 
 # 2. Prisma format (cek schema syntax)
 npx prisma format

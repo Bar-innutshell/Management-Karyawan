@@ -31,7 +31,7 @@ Server is not found or not accessible.
 ```powershell
 # Run as Administrator di PowerShell:
 cd backend
-.\diagnose-sql.ps1
+.\docs\errors\tools\diagnose-sql.ps1
 ```
 
 Script ini akan:
@@ -45,7 +45,7 @@ Script ini akan:
 **Atau pakai batch file (tidak perlu Admin):**
 ```cmd
 cd backend
-diagnose-sql.bat
+docs\errors\tools\diagnose-sql.bat
 ```
 
 Setelah diagnostic selesai, ikuti instruksi yang diberikan oleh script.
@@ -113,7 +113,7 @@ New-NetFirewallRule -DisplayName "SQL Server" -Direction Inbound -Protocol TCP -
 
 ```powershell
 cd backend
-node test-connection.js
+node docs/errors/tools/test-connection.js
 ```
 
 **Harus muncul:**
@@ -157,7 +157,7 @@ Centang semua ini:
 - [ ] Port 1433 terbuka (cek: `netstat -an | findstr "1433"`)
 - [ ] Firewall allow port 1433
 - [ ] **CONNECTION STRING BENAR** di `.env` (pakai `localhost:1433`, bukan `localhost\SQLEXPRESS`)
-- [ ] Test connection berhasil (`node test-connection.js`)
+- [ ] Test connection berhasil (`node docs/errors/tools/test-connection.js`)
 - [ ] File `.env` sudah diisi dengan benar
 - [ ] Database `db_restoran` sudah dibuat
 - [ ] User `prisma_user` ada dan punya permission
@@ -177,7 +177,7 @@ Jika sqlcmd berhasil tapi Prisma gagal, berarti **connection string salah**.
 **Test dengan Node.js:**
 ```powershell
 cd backend
-node test-connection.js
+node docs/errors/tools/test-connection.js
 ```
 
 Script ini akan memberikan diagnosis lengkap masalahnya.

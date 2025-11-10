@@ -1,10 +1,15 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
 /**
  * Script untuk generate slip gaji test
  * Generate slip gaji untuk semua karyawan bulan Oktober 2025
+ * 
+ * Usage dari backend folder:
+ *   node docs/tools/generate-slip-gaji.js
  */
+
+const path = require('path');
+// Resolve to backend/node_modules/@prisma/client
+const { PrismaClient } = require(path.resolve(__dirname, '../../node_modules/@prisma/client'));
+const prisma = new PrismaClient();
 async function generateSlipGaji() {
   console.log('🧾 Generating Slip Gaji for Oktober 2025...\n');
 

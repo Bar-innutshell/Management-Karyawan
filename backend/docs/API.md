@@ -732,10 +732,10 @@ totalGajiBersih = totalGajiKotor - totalPotongan
 **🛠️ Test Script:**
 ```bash
 # Generate slip gaji untuk semua karyawan
-node backend/prisma/generate-slip-gaji.js
+node backend/docs/tools/generate-slip-gaji.js
 
 # Lihat test guide lengkap
-cat backend/TEST-SLIP-GAJI.md
+cat backend/docs/TEST-SLIP-GAJI.md
 ```
 
 ---

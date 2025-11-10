@@ -30,7 +30,7 @@ Database belum punya field `createdAt` dan `updatedAt` di table `User`. Ini terj
 cd backend
 
 # 2. Jalankan migration SQL
-sqlcmd -S .\SQLEXPRESS -E -i add-user-timestamps.sql
+sqlcmd -S .\SQLEXPRESS -E -i docs/tools/add-user-timestamps.sql
 
 # 3. Generate Prisma Client
 npx prisma generate
@@ -156,7 +156,7 @@ node index.js
 
 **Solution**: Pakai Windows Authentication (`-E` flag) atau ganti dengan:
 ```powershell
-sqlcmd -S .\SQLEXPRESS -U prisma_user -P prisma123 -i add-user-timestamps.sql
+sqlcmd -S .\SQLEXPRESS -U prisma_user -P prisma123 -i docs/tools/add-user-timestamps.sql
 ```
 
 ### Error: "Cannot open database"
@@ -188,7 +188,7 @@ npx prisma studio
 
 ## Files Created
 
-- ✅ `backend/add-user-timestamps.sql` - Migration untuk fix error ini
+- ✅ `backend/docs/tools/add-user-timestamps.sql` - Migration untuk fix error ini
 - ✅ Schema Prisma sudah updated
 - ✅ Prisma Client sudah di-generate
 
@@ -196,8 +196,8 @@ npx prisma studio
 
 ## Need Help?
 
-1. Cek `TROUBLESHOOTING.md` untuk masalah umum lainnya
-2. Cek `QUICK-FIX.md` untuk setup SQL Server
+1. Cek `../TROUBLESHOOTING.md` untuk masalah umum lainnya
+2. Cek `../QUICK-FIX.md` untuk setup SQL Server
 3. Buka issue di GitHub atau tanya di grup
 
 ---

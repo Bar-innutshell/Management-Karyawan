@@ -24,7 +24,10 @@ Dokumentasi ini berisi API reference, aturan khusus (mis. field shift), panduan 
 - **[SEEDER-INFO.md](SEEDER-INFO.md)** — Panduan menggunakan database seeder
 - **[TEST-SLIP-GAJI.md](TEST-SLIP-GAJI.md)** — Test cases dan hasil generate slip gaji
 - **`../prisma/seed.js`** — Database seeder (8 users, 126 attendance, 42 income)
-- **`../prisma/generate-slip-gaji.js`** — Auto-generator slip gaji bulanan
+- **[tools/](tools/)** — 📂 Folder tools dan scripts
+  - **[tools/generate-slip-gaji.js](tools/generate-slip-gaji.js)** — Auto-generator slip gaji bulanan
+  - **[tools/add-user-timestamps.sql](tools/add-user-timestamps.sql)** — Add createdAt/updatedAt to User table
+  - **[tools/migrate-gaji-naming.sql](tools/migrate-gaji-naming.sql)** — Migrate gaji field naming consistency
 
 ### Error Troubleshooting
 - **[errors/](errors/)** — 📂 Folder error documentation
@@ -36,16 +39,14 @@ Dokumentasi ini berisi API reference, aturan khusus (mis. field shift), panduan 
   - **[errors/ERROR-FOREIGN-KEY.md](errors/ERROR-FOREIGN-KEY.md)** — Foreign key constraint errors
   - **[errors/MIGRATION-COMPLETE.md](errors/MIGRATION-COMPLETE.md)** — Migration completion guide
   - **[errors/TOOLS-MIGRATION.md](errors/TOOLS-MIGRATION.md)** — Migration tools guide
-
-### SQL Migration Scripts
-- **`../add-user-timestamps.sql`** — Add createdAt/updatedAt to User table
-- **`../migrate-gaji-naming.sql`** — Migrate gaji field naming consistency
-- **`setup-sql-login.sql`** — Script buat user SQL Server otomatis
-- **`enable-sql-auth.ps1`** — Enable Mixed Authentication mode
-- **`grant-create-db.sql`** — Grant dbcreator permission
-- **`diagnose-sql.ps1`** — Auto-diagnostic tool untuk SQL Server issues
-- **`diagnose-sql.bat`** — Batch version diagnostic tool
-- **`test-connection.js`** — Test koneksi database
+  - **[errors/tools/](errors/tools/)** — 📂 Setup & diagnostic tools
+    - **[errors/tools/setup-sql-login.sql](errors/tools/setup-sql-login.sql)** — Script buat user SQL Server otomatis
+    - **[errors/tools/enable-sql-auth.ps1](errors/tools/enable-sql-auth.ps1)** — Enable Mixed Authentication mode
+    - **[errors/tools/grant-create-db.sql](errors/tools/grant-create-db.sql)** — Grant dbcreator permission
+    - **[errors/tools/diagnose-sql.ps1](errors/tools/diagnose-sql.ps1)** — Auto-diagnostic tool untuk SQL Server issues
+    - **[errors/tools/diagnose-sql.bat](errors/tools/diagnose-sql.bat)** — Batch version diagnostic tool
+    - **[errors/tools/test-connection.js](errors/tools/test-connection.js)** — Test koneksi database
+    - **[errors/tools/fix-eperm.ps1](errors/tools/fix-eperm.ps1)** — Fix EPERM errors
 
 ---
 
@@ -64,8 +65,8 @@ Dokumentasi ini berisi API reference, aturan khusus (mis. field shift), panduan 
    ```
 
 2. **Setup SQL Server:**
-   - Jalankan `backend/setup-sql-login.sql` di SSMS untuk membuat login `prisma_user`.
-   - Jalankan `backend/grant-create-db.sql` untuk beri permission CREATE DATABASE (opsional, untuk migrate).
+   - Jalankan `backend/docs/errors/tools/setup-sql-login.sql` di SSMS untuk membuat login `prisma_user`.
+   - Jalankan `backend/docs/errors/tools/grant-create-db.sql` untuk beri permission CREATE DATABASE (opsional, untuk migrate).
    - Aktifkan Mixed Authentication mode (SQL + Windows Auth):
      - SSMS > klik kanan server > Properties > Security > pilih "SQL Server and Windows Authentication mode"
      - Restart SQL Server service di services.msc
