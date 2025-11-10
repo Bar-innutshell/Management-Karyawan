@@ -1,0 +1,67 @@
+========================================
+🔄 PENTING! SYNC DATABASE DULU
+========================================
+
+Halo! Sebelum bisa run seeder, database kita harus SAMA PERSIS.
+
+📖 Baca panduan lengkap:
+   backend/docs/SYNC-DATABASE.md
+
+⚡ QUICK START (Copy paste command ini):
+
+1. Masuk folder backend
+   cd backend
+
+2. Reset database (akan hapus semua data!)
+   npx prisma db push --force-reset
+
+3. Generate Prisma Client
+   npx prisma generate
+
+4. Seed database dengan data testing
+   npx prisma db seed
+
+5. (Opsional) Generate slip gaji untuk test
+   node docs/tools/generate-slip-gaji.js
+
+✅ SELESAI! Sekarang database kita sama persis!
+
+========================================
+⚠️ PERINGATAN
+========================================
+
+- Command di atas akan HAPUS SEMUA DATA di database!
+- Jika ada data penting, backup dulu
+- Cocok untuk development/testing
+
+========================================
+📋 VERIFIKASI
+========================================
+
+Cek apakah berhasil:
+
+1. Buka Prisma Studio
+   npx prisma studio
+
+2. Lihat table Absensi, pastikan ada field:
+   ✓ jamMulaiShift
+   ✓ jamSelesaiShift
+   ✓ shift
+   ✓ jamMasuk
+   ✓ jamKeluar
+
+3. Cek data hasil seed:
+   ✓ 8 users
+   ✓ 131 attendance records
+   ✓ 42 income reports
+
+========================================
+🆘 JIKA MASIH ERROR
+========================================
+
+Lihat dokumentasi troubleshooting:
+- backend/docs/errors/ERROR-SEED-ABSENSI.md
+- backend/docs/TROUBLESHOOTING.md
+- backend/docs/SYNC-DATABASE.md
+
+========================================
