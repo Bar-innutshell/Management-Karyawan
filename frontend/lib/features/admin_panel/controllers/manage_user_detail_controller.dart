@@ -147,7 +147,7 @@ class ManageUserDetailController extends GetxController {
         );
       } else {
         // Create new user
-        await _apiService.createUser(
+        await _apiService.register(
           nama: nameController.text.trim(),
           email: emailController.text.trim(),
           password: passwordController.text.trim(),

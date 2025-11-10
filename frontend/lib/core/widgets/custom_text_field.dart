@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -8,8 +9,9 @@ class CustomTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool readOnly;
   final VoidCallback? onTap;
-  final String? hintText; 
-  final int maxLines; 
+  final String? hintText;
+  final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -20,8 +22,9 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.readOnly = false,
     this.onTap,
-    this.hintText, 
-    this.maxLines = 1, 
+    this.hintText,
+    this.maxLines = 1,
+    this.inputFormatters,
   });
 
   @override
@@ -32,18 +35,19 @@ class CustomTextField extends StatelessWidget {
       keyboardType: keyboardType,
       readOnly: readOnly,
       onTap: onTap,
-      maxLines: maxLines, 
+      maxLines: maxLines,
+      inputFormatters: inputFormatters,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: const TextStyle(color: Colors.white70),
-        hintText: hintText, 
-        hintStyle: const TextStyle(color: Colors.white38), 
+        hintText: hintText,
+        hintStyle: const TextStyle(color: Colors.white38),
         prefixIcon: prefixIcon != null
             ? Icon(prefixIcon, color: Colors.white70, size: 20)
             : null,
         filled: true,
-        fillColor: const Color(0xFF374151), 
+        fillColor: const Color(0xFF374151),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

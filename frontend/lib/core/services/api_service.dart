@@ -1,19 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-
 import 'package:dio/dio.dart';
 import '../config/app_constants.dart';
 import 'storage_service.dart';
-// models
+// Models
 import '../models/role.dart';
 import '../models/user.dart';
-import '../models/attendance.dart';
 import '../models/gaji.dart';
-import '../models/report.dart';
-import '../models/schedule.dart';
 
+/// API Service - HTTP Client Layer
+/// Handles all communication with backend server
 class ApiService {
-  //service api
   final Dio _dio;
   final StorageService _storage;
 
@@ -27,11 +24,13 @@ class ApiService {
         receiveTimeout: AppConstants.apiTimeout,
       ),
     );
-    debugPrint(
-      'ApiService: constructing Dio with baseUrl=${AppConstants.baseUrl}',
-    );
+
+    debugPrint('ApiService: baseUrl=${AppConstants.baseUrl}');
     assert(!AppConstants.baseUrl.contains('/api'));
+
     final s = storage ?? StorageService();
+
+    // Add Authorization interceptor
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -47,38 +46,82 @@ class ApiService {
       ),
     );
 
+    // Add logging interceptor
     dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 
     return ApiService._(dio, s);
   }
 
-  //fitur login
+  // ═══════════════════════════════════════════════════════════
+  // AUTHENTICATION ENDPOINTS (authRoute.js)
+  // ═══════════════════════════════════════════════════════════
+
+  /// POST /auth/login
+  /// Login user and save token
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      final resp = await _dio.post(
+      final response = await _dio.post(
         '/auth/login',
         data: {'email': email, 'password': password},
       );
-      final data = resp.data as Map<String, dynamic>;
+
+      final data = response.data as Map<String, dynamic>;
       final token = data['token'] as String?;
+
       if (token != null) {
         await _storage.saveToken(token);
       }
+
       return data;
     } on DioException catch (e) {
-      final respData = e.response?.data;
-      if (respData is Map && respData['message'] != null) {
-        throw Exception(respData['message'].toString());
-      }
-      throw Exception(e.message);
+      throw Exception(_extractMessage(e));
     }
   }
 
-  //fitur role
-  Future<Map<String, dynamic>?> getRoleById(int id) async {
+  /// POST /auth/register
+  /// Register new user
+  Future<User> register({
+    required String nama,
+    required String email,
+    required String password,
+    required int roleId,
+    double? gajiPerJam,
+  }) async {
     try {
-      final resp = await _dio.get('/roles/$id');
-      return resp.data as Map<String, dynamic>;
+      final response = await _dio.post(
+        '/auth/register',
+        data: {
+          'nama': nama,
+          'email': email,
+          'password': password,
+          'roleId': roleId,
+          if (gajiPerJam != null) 'gajiPerJam': gajiPerJam,
+        },
+      );
+
+      final userData = response.data['user'] ?? response.data['data'];
+      return User.fromJson(userData as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_extractMessage(e));
+    }
+  }
+
+  /// Logout user (clear token)
+  Future<void> logout() async {
+    await _storage.deleteToken();
+  }
+
+  /// Decode JWT token payload
+  Map<String, dynamic>? decodeJwtPayload(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+
+      final payload = parts[1];
+      final normalized = base64Url.normalize(payload);
+      final decoded = utf8.decode(base64Url.decode(normalized));
+
+      return jsonDecode(decoded) as Map<String, dynamic>?;
     } catch (e) {
       return null;
     }
@@ -118,7 +161,7 @@ class ApiService {
   /// Buat role baru (POST /roles)
   Future<Role> createRole({
     required String nama,
-    int? gajiPokok,
+    double? gajiPokokBulanan, // ✅ Changed to double to match model
     String? deskripsi,
   }) async {
     try {
@@ -126,7 +169,8 @@ class ApiService {
         '/roles',
         data: {
           'nama': nama,
-          if (gajiPokok != null) 'gajiPokok': gajiPokok,
+          // Backend expects 'gajiPokok' but we use gajiPokokBulanan internally
+          if (gajiPokokBulanan != null) 'gajiPokok': gajiPokokBulanan,
           if (deskripsi != null) 'deskripsi': deskripsi,
         },
       );
@@ -141,7 +185,7 @@ class ApiService {
   Future<Role> updateRole(
     int id, {
     String? nama,
-    int? gajiPokok,
+    double? gajiPokokBulanan, // ✅ Changed to double to match model
     String? deskripsi,
   }) async {
     try {
@@ -149,7 +193,8 @@ class ApiService {
         '/roles/$id',
         data: {
           if (nama != null) 'nama': nama,
-          if (gajiPokok != null) 'gajiPokok': gajiPokok,
+          // Backend expects 'gajiPokok' but we use gajiPokokBulanan internally
+          if (gajiPokokBulanan != null) 'gajiPokok': gajiPokokBulanan,
           if (deskripsi != null) 'deskripsi': deskripsi,
         },
       );
@@ -169,118 +214,52 @@ class ApiService {
     }
   }
 
-  // =============================================================
-  // ABSENSI (attendance)
-  // =============================================================
-  /// Clock In (POST /absensi/clock-in)
-  Future<AttendanceRecord> clockIn(String shift) async {
-    try {
-      final resp = await _dio.post('/absensi/clock-in', data: {'shift': shift});
-      final data = resp.data['data'] ?? resp.data; // adapt if wrapped
-      return AttendanceRecord.fromJson((data as Map<String, dynamic>));
-    } on DioException catch (e) {
-      throw Exception(_extractMessage(e));
-    }
-  }
+  // ═══════════════════════════════════════════════════════════
+  // GAJI ENDPOINTS (gajiRoute.js)
+  // ═══════════════════════════════════════════════════════════
 
-  /// Clock Out (POST /absensi/clock-out)
-  Future<AttendanceRecord> clockOut() async {
-    try {
-      final resp = await _dio.post('/absensi/clock-out');
-      final data = resp.data['data'] ?? resp.data;
-      return AttendanceRecord.fromJson((data as Map<String, dynamic>));
-    } on DioException catch (e) {
-      throw Exception(_extractMessage(e));
-    }
-  }
-
-  /// Ambil riwayat absensi milik user login (GET /absensi/my)
-  Future<List<AttendanceRecord>> fetchMyAttendance() async {
-    try {
-      final resp = await _dio.get('/absensi/my');
-      final list = resp.data['data'] ?? resp.data;
-      if (list is List) {
-        return list
-            .whereType<Map<String, dynamic>>()
-            .map(AttendanceRecord.fromJson)
-            .toList();
-      }
-      return const [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Ambil absensi hari ini (GET /absensi/today)
-  Future<AttendanceRecord?> fetchTodayAttendance() async {
-    try {
-      final resp = await _dio.get('/absensi/today');
-      final data = resp.data['data'] ?? resp.data;
-      if (data is Map<String, dynamic>) {
-        return AttendanceRecord.fromJson(data);
-      }
-      return null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Ambil semua absensi (admin) (GET /absensi/all)
-  Future<List<AttendanceRecord>> fetchAllAttendance() async {
-    try {
-      final resp = await _dio.get('/absensi/all');
-      final list = resp.data['data'] ?? resp.data;
-      if (list is List) {
-        return list
-            .whereType<Map<String, dynamic>>()
-            .map(AttendanceRecord.fromJson)
-            .toList();
-      }
-      return const [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // =============================================================
-  // GAJI (salary)
-  // =============================================================
-  /// Set gaji per jam (POST /gaji/set-gaji-perjam)
+  /// POST /gaji/set-gaji-perjam
+  /// Set hourly wage for a user
   Future<UserGajiDetail> setGajiPerJam({
     required int userId,
     required double gajiPerJam,
   }) async {
     try {
-      final resp = await _dio.post(
+      final response = await _dio.post(
         '/gaji/set-gaji-perjam',
         data: {'userId': userId, 'gajiPerJam': gajiPerJam},
       );
-      final data = resp.data['data'] ?? resp.data;
+
+      final data = response.data['data'] ?? response.data;
       return UserGajiDetail.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw Exception(_extractMessage(e));
     }
   }
 
-  /// Hitung gaji dari gaji pokok role (POST /gaji/hitung-dari-gaji-pokok)
+  /// POST /gaji/hitung-dari-gaji-pokok
+  /// Calculate salary from role's base salary
   Future<UserGajiDetail> hitungDariGajiPokok({required int userId}) async {
     try {
-      final resp = await _dio.post(
+      final response = await _dio.post(
         '/gaji/hitung-dari-gaji-pokok',
         data: {'userId': userId},
       );
-      final data = resp.data['data'] ?? resp.data;
+
+      final data = response.data['data'] ?? response.data;
       return UserGajiDetail.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw Exception(_extractMessage(e));
     }
   }
 
-  /// Detail gaji user (GET /gaji/user/:userId)
+  /// GET /gaji/user/:userId
+  /// Get salary details for a specific user
   Future<UserGajiDetail?> fetchUserGaji(int userId) async {
     try {
-      final resp = await _dio.get('/gaji/user/$userId');
-      final data = resp.data['data'] ?? resp.data;
+      final response = await _dio.get('/gaji/user/$userId');
+      final data = response.data['data'] ?? response.data;
+
       if (data is Map<String, dynamic>) {
         return UserGajiDetail.fromJson(data);
       }
@@ -290,11 +269,13 @@ class ApiService {
     }
   }
 
-  /// Daftar gaji semua user (GET /gaji/all)
+  /// GET /gaji/all
+  /// Get salary list for all users
   Future<List<UserGajiListItem>> fetchAllUserGaji() async {
     try {
-      final resp = await _dio.get('/gaji/all');
-      final data = resp.data['data'] ?? resp.data;
+      final response = await _dio.get('/gaji/all');
+      final data = response.data['data'] ?? response.data;
+
       if (data is List) {
         return data
             .whereType<Map<String, dynamic>>()
@@ -307,188 +288,17 @@ class ApiService {
     }
   }
 
-  // =============================================================
-  // LAPORAN / PEMASUKKAN (reports & income)
-  // =============================================================
-  /// Total pemasukkan (GET /laporan/total)
-  Future<TotalIncomeSummary?> fetchTotalIncome({
-    String? startDate,
-    String? endDate,
-    String? shift,
-  }) async {
-    try {
-      final resp = await _dio.get(
-        '/laporan/total',
-        queryParameters: {
-          if (startDate != null) 'startDate': startDate,
-          if (endDate != null) 'endDate': endDate,
-          if (shift != null) 'shift': shift,
-        },
-      );
-      final data = resp.data['data'] ?? resp.data;
-      if (data is Map<String, dynamic>) {
-        return TotalIncomeSummary.fromJson(data);
-      }
-      return null;
-    } catch (_) {
-      return null;
-    }
-  }
+  // ═══════════════════════════════════════════════════════════
+  // USER MANAGEMENT ENDPOINTS (authRoute.js)
+  // ═══════════════════════════════════════════════════════════
 
-  /// Laporan harian (GET /laporan/harian)
-  Future<List<DailyIncomeSummary>> fetchDailyIncome({
-    String? startDate,
-    String? endDate,
-    String? shift,
-  }) async {
-    try {
-      final resp = await _dio.get(
-        '/laporan/harian',
-        queryParameters: {
-          if (startDate != null) 'startDate': startDate,
-          if (endDate != null) 'endDate': endDate,
-          if (shift != null) 'shift': shift,
-        },
-      );
-      final data = resp.data['data'] ?? resp.data;
-      if (data is List) {
-        return data
-            .whereType<Map<String, dynamic>>()
-            .map(DailyIncomeSummary.fromJson)
-            .toList();
-      }
-      return const [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Laporan detail pemasukkan (GET /laporan/detail)
-  Future<List<IncomeReport>> fetchIncomeDetail({
-    String? startDate,
-    String? endDate,
-    String? shift,
-  }) async {
-    try {
-      final resp = await _dio.get(
-        '/laporan/detail',
-        queryParameters: {
-          if (startDate != null) 'startDate': startDate,
-          if (endDate != null) 'endDate': endDate,
-          if (shift != null) 'shift': shift,
-        },
-      );
-      final data = resp.data['data'] ?? resp.data;
-      if (data is List) {
-        return data
-            .whereType<Map<String, dynamic>>()
-            .map(IncomeReport.fromJson)
-            .toList();
-      }
-      return const [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Daftar pemasukkan (GET /pemasukkan/show)
-  Future<List<IncomeReport>> fetchPemasukkan() async {
-    try {
-      final resp = await _dio.get('/pemasukkan/show');
-      final data = resp.data['data'] ?? resp.data;
-      if (data is List) {
-        return data
-            .whereType<Map<String, dynamic>>()
-            .map(IncomeReport.fromJson)
-            .toList();
-      }
-      return const [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Tambah pemasukkan baru (POST /pemasukkan/insert)
-  Future<IncomeReport> createPemasukkan({
-    required double jumlahPemasukan,
-    required String shift,
-  }) async {
-    try {
-      final resp = await _dio.post(
-        '/pemasukkan/insert',
-        data: {'jumlahPemasukkan': jumlahPemasukan, 'shift': shift},
-      );
-      final data = resp.data['data'] ?? resp.data;
-      return IncomeReport.fromJson(data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw Exception(_extractMessage(e));
-    }
-  }
-
-  // =============================================================
-  // JADWAL (schedule) - ASSUMPTION endpoints (adjust if different)
-  // =============================================================
-  /// Ambil jadwal (GET /schedule) asumsi path
-  Future<List<ScheduleItem>> fetchSchedule() async {
-    try {
-      final resp = await _dio.get('/schedule');
-      final data = resp.data['data'] ?? resp.data;
-      if (data is List) {
-        return data
-            .whereType<Map<String, dynamic>>()
-            .map(ScheduleItem.fromJson)
-            .toList();
-      }
-      return const [];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Generate / create jadwal baru (POST /schedule/create) asumsi path
-  Future<List<ScheduleItem>> createSchedule() async {
-    try {
-      final resp = await _dio.post('/schedule/create');
-      final data = resp.data['data'] ?? resp.data;
-      if (data is List) {
-        return data
-            .whereType<Map<String, dynamic>>()
-            .map(ScheduleItem.fromJson)
-            .toList();
-      }
-      return const [];
-    } on DioException catch (e) {
-      throw Exception(_extractMessage(e));
-    }
-  }
-
-  //fitur logout
-  Future<void> logout() async {
-    await _storage.deleteToken();
-  }
-
-  //model jwt
-  Map<String, dynamic>? decodeJwtPayload(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) return null;
-      final payload = parts[1];
-      final normalized = base64Url.normalize(payload);
-      final decoded = utf8.decode(base64Url.decode(normalized));
-      return jsonDecode(decoded) as Map<String, dynamic>?;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // =============================================================
-  // USERS MANAGEMENT
-  // =============================================================
-  /// Ambil semua user (GET /auth/users)
+  /// GET /auth/users
+  /// Get all users
   Future<List<User>> getUsers() async {
     try {
-      final resp = await _dio.get('/auth/users');
-      final data = resp.data['data'] ?? resp.data;
+      final response = await _dio.get('/auth/users');
+      final data = response.data['data'] ?? response.data;
+
       if (data is List) {
         return data
             .whereType<Map<String, dynamic>>()
@@ -501,11 +311,13 @@ class ApiService {
     }
   }
 
-  /// Ambil detail satu user (GET /auth/user/:id)
+  /// GET /auth/user/:id
+  /// Get user by ID
   Future<User?> getUser(int id) async {
     try {
-      final resp = await _dio.get('/auth/user/$id');
-      final data = resp.data['data'] ?? resp.data;
+      final response = await _dio.get('/auth/user/$id');
+      final data = response.data['data'] ?? response.data;
+
       if (data is Map<String, dynamic>) {
         return User.fromJson(data);
       }
@@ -515,33 +327,8 @@ class ApiService {
     }
   }
 
-  /// Buat user baru (POST /auth/register)
-  Future<User> createUser({
-    required String nama,
-    required String email,
-    required String password,
-    required int roleId,
-    double? gajiPerJam,
-  }) async {
-    try {
-      final resp = await _dio.post(
-        '/auth/register',
-        data: {
-          'nama': nama,
-          'email': email,
-          'password': password,
-          'roleId': roleId,
-          if (gajiPerJam != null) 'gajiPerJam': gajiPerJam,
-        },
-      );
-      final data = resp.data['data'] ?? resp.data;
-      return User.fromJson(data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw Exception(_extractMessage(e));
-    }
-  }
-
-  /// Update user (PUT /auth/user/:id)
+  /// PUT /auth/user/:id
+  /// Update user
   Future<User> updateUser(
     int id, {
     String? nama,
@@ -551,7 +338,7 @@ class ApiService {
     double? gajiPerJam,
   }) async {
     try {
-      final resp = await _dio.put(
+      final response = await _dio.put(
         '/auth/user/$id',
         data: {
           if (nama != null) 'nama': nama,
@@ -561,14 +348,16 @@ class ApiService {
           if (gajiPerJam != null) 'gajiPerJam': gajiPerJam,
         },
       );
-      final data = resp.data['data'] ?? resp.data;
+
+      final data = response.data['data'] ?? response.data;
       return User.fromJson(data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw Exception(_extractMessage(e));
     }
   }
 
-  /// Hapus user (DELETE /auth/user/:id)
+  /// DELETE /auth/user/:id
+  /// Delete user
   Future<void> deleteUser(int id) async {
     try {
       await _dio.delete('/auth/user/$id');

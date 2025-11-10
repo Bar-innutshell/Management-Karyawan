@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../../../core/config/app_theme.dart';
@@ -90,7 +91,14 @@ class ManageUserDetailScreen extends StatelessWidget {
                                 labelText: 'Gaji per jam',
                                 hintText: 'Masukkan gaji per jam (opsional)',
                                 prefixIcon: Icons.attach_money,
-                                keyboardType: TextInputType.number,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: false,
+                                      signed: false,
+                                    ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                               )
                               .animate()
                               .fadeIn(duration: 400.ms, delay: 300.ms)

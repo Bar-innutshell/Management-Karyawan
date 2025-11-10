@@ -3,8 +3,8 @@ class User {
   final String? nama;
   final String? email;
   final int? roleId;
-  final double? gajiPerJam; 
-  final RoleSummary? role; 
+  final double? gajiPerJam;
+  final RoleSummary? role;
 
   User({
     this.id,
@@ -74,16 +74,25 @@ class User {
 
 class RoleSummary {
   final String? nama;
-  final int? gajiPokok;
-  RoleSummary({this.nama, this.gajiPokok});
+  final double? gajiPokokBulanan; // ✅ Changed to match schema
+
+  RoleSummary({this.nama, this.gajiPokokBulanan});
+
   factory RoleSummary.fromJson(Map<String, dynamic> json) => RoleSummary(
     nama: json['nama']?.toString(),
-    gajiPokok: json['gajiPokok'] is int
-        ? json['gajiPokok'] as int
-        : int.tryParse('${json['gajiPokok']}'),
+    gajiPokokBulanan: _parseDouble(
+      json['gajiPokokBulanan'] ?? json['gajiPokok'],
+    ), // ✅ Support both field names
   );
+
   Map<String, dynamic> toJson() => {
     if (nama != null) 'nama': nama,
-    if (gajiPokok != null) 'gajiPokok': gajiPokok,
+    if (gajiPokokBulanan != null) 'gajiPokokBulanan': gajiPokokBulanan,
   };
+
+  static double? _parseDouble(Object? v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
+  }
 }

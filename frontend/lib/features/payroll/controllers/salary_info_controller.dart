@@ -3,16 +3,17 @@ import '../../../core/services/api_service.dart';
 import '../../../core/models/gaji.dart';
 
 class SalaryInfoController extends GetxController {
-  final ApiService _api = ApiService();
+  // Use Get.find() for dependency injection
+  final ApiService _api = Get.find<ApiService>();
 
-  final salaries = <UserGajiListItem>[].obs;
-  final filteredSalaries = <UserGajiListItem>[].obs;
-  final isLoading = false.obs;
-  final error = RxnString();
+  final RxList<UserGajiListItem> salaries = <UserGajiListItem>[].obs;
+  final RxList<UserGajiListItem> filteredSalaries = <UserGajiListItem>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxnString error = RxnString();
 
-  final selectedMonth = RxnString();
-  final selectedYear = RxnString();
-  final searchQuery = ''.obs;
+  final RxnString selectedMonth = RxnString();
+  final RxnString selectedYear = RxnString();
+  final RxString searchQuery = ''.obs;
 
   final months = [
     'Januari',

@@ -23,13 +23,12 @@ class AdminPanelScreen extends StatelessWidget {
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () => Get.toNamed(Routes.salaryInfo),
             ),
-            ListTile(
-              title: const Text('Manage Schedules'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // TODO: Navigate to schedules
-              },
-            ),
+            // TODO: Schedule feature - waiting for backend implementation
+            // ListTile(
+            //   title: const Text('Manage Jadwal'),
+            //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            //   onTap: () => Get.toNamed(Routes.manageSchedule),
+            // ),
             ListTile(
               title: const Text('Manage Roles'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
