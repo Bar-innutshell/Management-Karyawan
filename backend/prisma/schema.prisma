@@ -1,109 +1,94 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-
-// --- MODEL UNTUK MANAJEMEN USER & ROLE ---
-
-// Model untuk Role (Admin, Cashier, Employee, dll - bisa custom)
 model Role {
-  id         Int      @id @default(autoincrement())
-  nama       String   @unique // "Admin", "Cashier", "Employee", dst
-  gajiPokok  Float    @default(0) // Gaji pokok untuk role ini
-  deskripsi  String?  // Deskripsi role (opsional)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
-  users      User[]
+  id               Int      @id @default(autoincrement())
+  nama             String   @unique
+  createdAt        DateTime @default(now())
+  deskripsi        String?
+  updatedAt        DateTime @default(now()) @updatedAt
+  gajiPokokBulanan Float    @default(0, map: "DF__Role__gajiPokokB__0B91BA14")
+  users            User[]
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  nama      String
-  password  String // Penting: Jangan simpan password asli, simpan versi hash-nya
-  role      Role     @relation(fields: [roleId], references: [id])
-  roleId    Int
-  
-  // Gaji per jam (admin yang set, untuk hitung gaji harian)
-  gajiPerJam Float   @default(0) // Gaji per jam kerja
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  // Relasi ke fitur lain
-  gaji              Gaji[]
-  jadwal            Jadwal[]
-  absensi           Absensi[]
-  laporanPemasukan  LaporanPemasukan[]
+  id               Int                @id @default(autoincrement())
+  email            String             @unique
+  nama             String
+  password         String
+  roleId           Int
+  createdAt        DateTime           @default(now())
+  gajiPerJam       Float              @default(0)
+  updatedAt        DateTime           @default(now()) @updatedAt
+  absensi          Absensi[]
+  jadwal           Jadwal[]
+  laporanPemasukan LaporanPemasukan[]
+  slipGaji         SlipGaji[]
+  role             Role               @relation(fields: [roleId], references: [id])
 }
-
-// --- MODEL UNTUK FITUR JADWAL & ABSENSI ---
 
 model Jadwal {
   id           Int      @id @default(autoincrement())
   waktuMulai   DateTime
   waktuSelesai DateTime
-  user         User     @relation(fields: [userId], references: [id])
   userId       Int
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 model Absensi {
-  id         Int      @id @default(autoincrement())
-  tanggal    DateTime @default(now()) @db.Date // Tanggal absensi
-  shift      String   // "Siang" (09:00-15:00) atau "Sore" (15:00-21:00)
-  
-  jamMasuk   DateTime @default(now()) // Jam aktual masuk kerja
-  jamKeluar  DateTime? // Jam aktual keluar kerja (nullable jika belum clock out)
-  
-  // Jam standar shift (untuk hitung keterlambatan)
-  jamMulaiShift   DateTime // 09:00 untuk Siang, 15:00 untuk Sore
-  jamSelesaiShift DateTime // 15:00 untuk Siang, 21:00 untuk Sore
-  
-  // Perhitungan gaji
-  jamKerja      Float   @default(0) // Total jam kerja actual (jamKeluar - jamMasuk)
-  menitTerlambat Int    @default(0) // Menit terlambat dari jamMulaiShift
-  potonganGaji  Float   @default(0) // Potongan karena telat (jika > 10 menit)
-  totalGaji     Float   @default(0) // Gaji yang didapat (gajiPerJam × jamKerja - potongan)
-  
-  status     String   @default("Hadir") // "Hadir", "Telat", "Alpha"
-  
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  id              Int       @id @default(autoincrement())
+  jamMasuk        DateTime  @default(now())
+  jamKeluar       DateTime?
+  userId          Int
+  createdAt       DateTime  @default(now())
+  jamKerja        Float     @default(0)
+  jamMulaiShift   DateTime
+  jamSelesaiShift DateTime
+  menitTerlambat  Int       @default(0)
+  potonganGaji    Float     @default(0)
+  shift           String
+  status          String    @default("Hadir")
+  tanggal         DateTime  @default(now()) @db.Date
+  totalGaji       Float     @default(0)
+  updatedAt       DateTime  @default(now()) @updatedAt
+  user            User      @relation(fields: [userId], references: [id])
 }
 
-// --- MODEL UNTUK FITUR GAJI & PEMASUKAN ---
+model SlipGaji {
+  id              Int      @id(map: "PK__SlipGaji__3213E83F2B37C9E9") @default(autoincrement())
+  bulan           Int
+  tahun           Int
+  gajiBulanan     Float
+  bonusKehadiran  Float    @default(0, map: "DF__SlipGaji__bonusK__0F624AF8")
+  bonusLainnya    Float    @default(0, map: "DF__SlipGaji__bonusL__10566F31")
+  potonganAlpha   Float    @default(0, map: "DF__SlipGaji__potong__114A936A")
+  potonganTelat   Float    @default(0, map: "DF__SlipGaji__potong__123EB7A3")
+  potonganLainnya Float    @default(0, map: "DF__SlipGaji__potong__1332DBDC")
+  totalGajiKotor  Float
+  totalPotongan   Float
+  totalGajiBersih Float
+  tanggalBayar    DateTime @default(now(), map: "DF__SlipGaji__tangga__14270015") @db.DateTime
+  keterangan      String?  @db.NVarChar(500)
+  userId          Int
+  createdAt       DateTime @default(now(), map: "DF__SlipGaji__create__160F4887") @db.DateTime
+  updatedAt       DateTime @default(now(), map: "DF__SlipGaji__update__17036CC0") @updatedAt @db.DateTime
+  user            User     @relation(fields: [userId], references: [id], onUpdate: NoAction, map: "FK__SlipGaji__userId__151B244E")
 
-model Gaji {
-  id         Int      @id @default(autoincrement())
-  gajiPokok  Float
-  bonus      Float    @default(0)
-  potongan   Float    @default(0)
-  tanggalGaji DateTime
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
+  @@unique([userId, bulan, tahun])
 }
 
 model LaporanPemasukan {
   id              Int      @id @default(autoincrement())
   jumlahPemasukan Float
   tanggalLaporan  DateTime
-  shift           String // Menggunakan enum Shift di bawah
-  user            User     @relation(fields: [userId], references: [id])
+  shift           String
   userId          Int
+  user            User     @relation(fields: [userId], references: [id])
 }
-

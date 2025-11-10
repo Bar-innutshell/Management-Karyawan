@@ -98,7 +98,7 @@ exports.hitungGajiDariGajiPokok = async (req, res) => {
     }
 
     // Hitung gaji per jam dari gaji pokok role
-    const gajiPerJam = user.role.gajiPokok / 20 / 6;
+    const gajiPerJam = user.role.gajiPokokBulanan / 20 / 6;
 
     // Update gaji per jam user
     const updatedUser = await prisma.user.update({
@@ -116,11 +116,11 @@ exports.hitungGajiDariGajiPokok = async (req, res) => {
           role: user.role.nama,
         },
         gaji: {
-          gajiPokok: user.role.gajiPokok,
+          gajiPokokBulanan: user.role.gajiPokokBulanan,
           gajiPerJam: gajiPerJam,
           gajiHarian: gajiPerJam * 6,
-          gajiBulanan: user.role.gajiPokok,
-          formula: `${user.role.gajiPokok} ÷ 20 hari ÷ 6 jam = ${gajiPerJam.toFixed(2)} per jam`,
+          gajiBulanan: user.role.gajiPokokBulanan,
+          formula: `${user.role.gajiPokokBulanan} ÷ 20 hari ÷ 6 jam = ${gajiPerJam.toFixed(2)} per jam`,
         },
       },
     });
@@ -172,7 +172,7 @@ exports.getUserGaji = async (req, res) => {
           role: user.role.nama,
         },
         gaji: {
-          gajiPokok: user.role.gajiPokok,
+          gajiPokokBulanan: user.role.gajiPokokBulanan,
           gajiPerJam: user.gajiPerJam,
           gajiHarian: user.gajiPerJam * 6, // 6 jam per shift
           gajiBulanan: user.gajiPerJam * 6 * 20, // 20 hari kerja
@@ -219,7 +219,7 @@ exports.getAllUserGaji = async (req, res) => {
         role: user.role.nama,
       },
       gaji: {
-        gajiPokok: user.role.gajiPokok,
+        gajiPokokBulanan: user.role.gajiPokokBulanan,
         gajiPerJam: user.gajiPerJam,
         gajiHarian: user.gajiPerJam * 6,
         gajiBulanan: user.gajiPerJam * 6 * 20,
