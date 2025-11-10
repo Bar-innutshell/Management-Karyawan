@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-
 import 'package:dio/dio.dart';
 import '../config/app_constants.dart';
 import 'storage_service.dart';
 
 class ApiService {
-  //service api
   final Dio _dio;
   final StorageService _storage;
 
@@ -20,11 +18,14 @@ class ApiService {
         receiveTimeout: AppConstants.apiTimeout,
       ),
     );
+
     debugPrint(
       'ApiService: constructing Dio with baseUrl=${AppConstants.baseUrl}',
     );
+
     assert(!AppConstants.baseUrl.contains('/api'));
     final s = storage ?? StorageService();
+
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -45,7 +46,7 @@ class ApiService {
     return ApiService._(dio, s);
   }
 
-  //fitur login
+  // ==================== FITUR LOGIN ====================
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final resp = await _dio.post(
@@ -67,7 +68,7 @@ class ApiService {
     }
   }
 
-  //fitur role
+  // ==================== FITUR ROLE ====================
   Future<Map<String, dynamic>?> getRoleById(int id) async {
     try {
       final resp = await _dio.get('/roles/$id');
@@ -77,12 +78,12 @@ class ApiService {
     }
   }
 
-  //fitur logout
+  // ==================== FITUR LOGOUT ====================
   Future<void> logout() async {
     await _storage.deleteToken();
   }
 
-  //model jwt
+  // ==================== JWT DECODER ====================
   Map<String, dynamic>? decodeJwtPayload(String token) {
     try {
       final parts = token.split('.');
@@ -95,4 +96,54 @@ class ApiService {
       return null;
     }
   }
+
+  // =====================================================
+  // 🌐 GENERIC API METHODS (untuk fitur lain, termasuk laporan)
+  // =====================================================
+
+  Future<dynamic> getData(String endpoint) async {
+  try {
+    final response = await _dio.get(endpoint);
+    return response.data;
+  } on DioException catch (e) {
+    throw Exception(e.response?.data['message'] ?? e.message);
+  }
+}
+
+  Future<dynamic> postData(String endpoint, Map<String, dynamic> data) async {
+  try {
+    final response = await _dio.post(endpoint, data: data);
+    return response.data;
+  } on DioException catch (e) {
+    throw Exception(e.response?.data['message'] ?? e.message);
+  }
+}
+
+  Future<dynamic> putData(String endpoint, Map<String, dynamic> data) async {
+    try {
+      final resp = await _dio.put(endpoint, data: data);
+      return resp.data;
+    } on DioException catch (e) {
+      _handleError(e);
+    }
+  }
+
+  Future<dynamic> deleteData(String endpoint) async {
+    try {
+      final resp = await _dio.delete(endpoint);
+      return resp.data;
+    } on DioException catch (e) {
+      _handleError(e);
+    }
+  }
+
+  void _handleError(DioException e) {
+    final respData = e.response?.data;
+    if (respData is Map && respData['message'] != null) {
+      throw Exception(respData['message'].toString());
+    } else {
+      throw Exception(e.message);
+    }
+  }
+  
 }
