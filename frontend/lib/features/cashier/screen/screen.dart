@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/config/routes.dart';
+import '../../../../core/config/routes.dart';
 
-class EmployeeScreen extends StatelessWidget {
-  const EmployeeScreen({super.key});
+class CashierScreen extends StatelessWidget {
+  const CashierScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final String userName = "Nama Lengkap";
-    final String userRole = "Employee";
+    final String userName = "Nama Cashier"; // nanti bisa di-bind ke database
+    final String userRole = "Cashier";
 
     const Color bgColor = Color(0xFF0F172A);
     const Color cardColor = Color(0xFF1E293B);
     const Color textPrimary = Colors.white;
     const Color textSecondary = Color(0xFFCBD5E1);
-    const Color accentBlue = Color(0xFF3B82F6);
+    const Color accentGreen = Color(0xFF22C55E); // hijau untuk cashier
 
     return Scaffold(
       body: Container(
@@ -39,7 +39,7 @@ class EmployeeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // kiri: Nama dan Role
+                    // kiri
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +64,7 @@ class EmployeeScreen extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: accentBlue.withOpacity(0.2),
+                            color: accentGreen.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -78,36 +78,31 @@ class EmployeeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // kanan: Log Out dengan outline merah
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.red, width: 1),
-                        borderRadius: BorderRadius.circular(6),
-                        color: cardColor,
-                      ),
-                      child: TextButton(
-                        onPressed: () {
-                          Get.offAllNamed(Routes.auth);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          backgroundColor: cardColor,
+                    // kanan: Log Out
+                    TextButton(
+                      onPressed: () {
+                        Get.offAllNamed(Routes.auth);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
                         ),
-                        child: const Text(
-                          "Log Out",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        backgroundColor: cardColor,
+                      ),
+                      child: const Text(
+                        "Log Out",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 20),
 
               // ===== KONTEN =====
               Expanded(
@@ -122,7 +117,7 @@ class EmployeeScreen extends StatelessWidget {
                           child: AspectRatio(
                             aspectRatio: 16 / 9,
                             child: Image.asset(
-                              'assets/coe.png',
+                              'assets/jalan.png',
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -136,7 +131,7 @@ class EmployeeScreen extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Menu Employee",
+                          "Menu Cashier",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -145,23 +140,16 @@ class EmployeeScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 12),
 
                     // ===== MENU CARDS DENGAN ROUTING =====
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.calendar_today,
-                      title: "Lihat Jadwal",
-                      description: "Lihat detail jadwal kerja mu.",
-                      routeName: Routes.schedule,
-                    ),
                     _buildMenuCard(
                       context,
                       icon: Icons.access_time,
                       title: "Absensi Harian",
                       description: "Cek dan catat kehadiran kamu setiap hari.",
                       routeName: Routes.attendance,
+                      accentColor: accentGreen,
                     ),
                     _buildMenuCard(
                       context,
@@ -169,6 +157,7 @@ class EmployeeScreen extends StatelessWidget {
                       title: "Cek Gaji",
                       description: "Lihat detail gaji dan tunjangan bulanan.",
                       routeName: Routes.payroll,
+                      accentColor: accentGreen,
                     ),
                     _buildMenuCard(
                       context,
@@ -176,6 +165,7 @@ class EmployeeScreen extends StatelessWidget {
                       title: "Kirim Laporan (Kasir)",
                       description: "Kirim laporan harian untuk bagian kasir.",
                       routeName: Routes.reporting,
+                      accentColor: accentGreen,
                     ),
 
                     const SizedBox(height: 12),
@@ -203,11 +193,11 @@ class EmployeeScreen extends StatelessWidget {
     required String title,
     required String description,
     required String routeName,
+    required Color accentColor,
   }) {
     const Color cardColor = Color(0xFF1E293B);
     const Color textPrimary = Colors.white;
     const Color textSecondary = Color(0xFFCBD5E1);
-    const Color accentBlue = Color(0xFF3B82F6);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -234,10 +224,10 @@ class EmployeeScreen extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: accentBlue.withOpacity(0.18),
+                color: accentColor.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: accentBlue),
+              child: Icon(icon, color: accentColor),
             ),
             const SizedBox(width: 16),
             Expanded(
