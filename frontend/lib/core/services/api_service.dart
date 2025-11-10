@@ -58,7 +58,7 @@ class ApiService {
         await _storage.saveToken(token);
       }
       return data;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       final respData = e.response?.data;
       if (respData is Map && respData['message'] != null) {
         throw Exception(respData['message'].toString());

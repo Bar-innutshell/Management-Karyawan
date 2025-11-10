@@ -3,6 +3,7 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 const authRoutes = require('./routes/authRoute')
 const roleRoutes = require('./routes/roleRoute')
+const pemasukkanRoute = require('./routes/pemasukkanRoute')
 dotenv.config()
 
 const app = express()
@@ -47,6 +48,7 @@ app.get('/db/ping', async (req, res) => {
 
 app.use('/auth', authRoutes)
 app.use('/roles', roleRoutes)
+app.use('/pemasukkan', pemasukkanRoute)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, '0.0.0.0', () => {
