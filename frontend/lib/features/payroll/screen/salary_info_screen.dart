@@ -207,47 +207,54 @@ class SalaryInfoScreen extends StatelessWidget {
                         );
                       }
 
-                      return ListView.separated(
-                        itemCount: controller.filteredSalaries.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final item = controller.filteredSalaries[index];
-                          return GestureDetector(
-                            onTap: () {
-                              // Navigate to detail with parameters
-                              Get.toNamed(
-                                Routes.salaryDetail,
-                                arguments: {
-                                  'userId': item.userId ?? 0,
-                                  'userName': item.nama ?? 'N/A',
-                                  'userEmail': item.email ?? '',
-                                  'roleName': item.roleName,
-                                },
-                              );
-                            },
-                            child:
-                                _SalaryCard(
-                                      nama: item.nama ?? 'N/A',
-                                      roleName: item.roleName ?? '-',
-                                      rateGaji: controller.formatCurrency(
-                                        item.gajiPerJam,
-                                      ),
-                                      total: controller.formatCurrency(
-                                        item.gajiBulanan ??
-                                            controller
-                                                .calculateMonthlyFromHourly(
-                                                  item.gajiPerJam,
-                                                ),
-                                      ),
-                                    )
-                                    .animate()
-                                    .fadeIn(
-                                      duration: 300.ms,
-                                      delay: (50 * index).ms,
-                                    )
-                                    .slideX(begin: -0.1, end: 0),
-                          );
-                        },
+                      return RefreshIndicator(
+                        color: const Color(0xFF2563EB),
+                        backgroundColor: const Color(0xFF0F1115),
+                        onRefresh: controller.refresh,
+                        child: ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: controller.filteredSalaries.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final item = controller.filteredSalaries[index];
+                            return GestureDetector(
+                              onTap: () {
+                                // Navigate to detail with parameters
+                                Get.toNamed(
+                                  Routes.salaryDetail,
+                                  arguments: {
+                                    'userId': item.userId ?? 0,
+                                    'userName': item.nama ?? 'N/A',
+                                    'userEmail': item.email ?? '',
+                                    'roleName': item.roleName,
+                                  },
+                                );
+                              },
+                              child:
+                                  _SalaryCard(
+                                        nama: item.nama ?? 'N/A',
+                                        roleName: item.roleName ?? '-',
+                                        rateGaji: controller.formatCurrency(
+                                          item.gajiPerJam,
+                                        ),
+                                        total: controller.formatCurrency(
+                                          item.gajiBulanan ??
+                                              controller
+                                                  .calculateMonthlyFromHourly(
+                                                    item.gajiPerJam,
+                                                  ),
+                                        ),
+                                      )
+                                      .animate()
+                                      .fadeIn(
+                                        duration: 300.ms,
+                                        delay: (50 * index).ms,
+                                      )
+                                      .slideX(begin: -0.1, end: 0),
+                            );
+                          },
+                        ),
                       );
                     }),
                   ),

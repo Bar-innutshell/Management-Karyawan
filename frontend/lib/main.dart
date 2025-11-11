@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'core/config/routes.dart';
 import 'core/config/app_theme.dart';
 import 'core/services/storage_service.dart';
@@ -7,6 +9,7 @@ import 'core/services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
 
   // Initialize services
   final storageService = StorageService();

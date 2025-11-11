@@ -5,7 +5,12 @@ const { authenticateToken, isAdmin } = require('../middleware/authMiddleware');
 
 // Endpoint gaji per jam (Admin only)
 router.post('/set-gaji-perjam', authenticateToken, isAdmin, gajiController.setGajiPerJam);
-router.post('/hitung-dari-gaji-pokok', authenticateToken, isAdmin, gajiController.hitungGajiDariGajiPokok);
+router.post(
+	'/hitung-dari-gaji-pokok',
+	authenticateToken,
+	isAdmin,
+	gajiController.hitungGajiDariGajiPokokBulanan,
+);
 router.get('/user/:userId', authenticateToken, isAdmin, gajiController.getUserGaji);
 router.get('/all', authenticateToken, isAdmin, gajiController.getAllUserGaji);
 

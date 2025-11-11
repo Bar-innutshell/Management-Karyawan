@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/models/gaji.dart';
@@ -53,6 +54,8 @@ class SalaryInfoController extends GetxController {
       final data = await _api.fetchAllUserGaji();
       salaries.assignAll(data);
       _applyFilters();
+    } on DioException catch (e) {
+      error.value = _friendlyError(e);
     } catch (e) {
       error.value = e.toString();
     } finally {
@@ -93,6 +96,10 @@ class SalaryInfoController extends GetxController {
     filteredSalaries.assignAll(result);
   }
 
+  Future<void> refresh() async {
+    await loadSalaries();
+  }
+
   String formatCurrency(double? amount) {
     if (amount == null || amount == 0) return 'Rp 0';
     final formatted = amount
@@ -105,5 +112,20 @@ class SalaryInfoController extends GetxController {
     if (gajiPerJam == null || gajiPerJam == 0) return 0;
     // Formula: gajiPerJam × 6 jam × 20 hari
     return gajiPerJam * 6 * 20;
+  }
+
+  String _friendlyError(DioException e) {
+    final resp = e.response;
+    if (resp?.data is Map && resp?.data['message'] != null) {
+      return resp!.data['message'].toString();
+    }
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return 'Permintaan ke server melebihi batas waktu.';
+    }
+    if (resp?.statusCode == 401 || resp?.statusCode == 403) {
+      return 'Sesi tidak valid. Silakan login kembali untuk melihat data gaji.';
+    }
+    return e.message ?? 'Gagal memuat data gaji.';
   }
 }

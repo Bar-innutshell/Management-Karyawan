@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../config/app_constants.dart';
 import 'storage_service.dart';
-// Models
 import '../models/role.dart';
 import '../models/user.dart';
 import '../models/gaji.dart';
@@ -135,22 +134,22 @@ class ApiService {
   // =====================================================
 
   Future<dynamic> getData(String endpoint) async {
-  try {
-    final response = await _dio.get(endpoint);
-    return response.data;
-  } on DioException catch (e) {
-    throw Exception(e.response?.data['message'] ?? e.message);
+    try {
+      final response = await _dio.get(endpoint);
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? e.message);
+    }
   }
-}
 
   Future<dynamic> postData(String endpoint, Map<String, dynamic> data) async {
-  try {
-    final response = await _dio.post(endpoint, data: data);
-    return response.data;
-  } on DioException catch (e) {
-    throw Exception(e.response?.data['message'] ?? e.message);
+    try {
+      final response = await _dio.post(endpoint, data: data);
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? e.message);
+    }
   }
-}
 
   Future<dynamic> putData(String endpoint, Map<String, dynamic> data) async {
     try {
@@ -178,5 +177,150 @@ class ApiService {
       throw Exception(e.message);
     }
   }
-  
+
+  // ═══════════════════════════════════════════════════════════
+  // ROLE ENDPOINTS (roleRoute.js)
+  // ═══════════════════════════════════════════════════════════
+
+  /// GET /roles
+  /// Fetch all roles
+  Future<List<Role>> fetchRoles() async {
+    try {
+      final resp = await _dio.get('/roles');
+      final payload = resp.data;
+      final list = (payload is Map && payload['data'] is List)
+          ? payload['data'] as List
+          : (payload as List? ?? const []);
+      return list.whereType<Map<String, dynamic>>().map(Role.fromJson).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// GET /roles/:id
+  /// Fetch single role by id
+  Future<Role?> fetchRole(int id) async {
+    try {
+      final resp = await _dio.get('/roles/$id');
+      final data = resp.data;
+      final map = (data is Map && data['data'] is Map)
+          ? data['data'] as Map<String, dynamic>
+          : (data as Map<String, dynamic>);
+      return Role.fromJson(map);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // GAJI ENDPOINTS (gajiRoute.js)
+  // ═══════════════════════════════════════════════════════════
+
+  /// GET /gaji/user/:userId
+  /// Get salary details for a specific user
+  Future<UserGajiDetail?> fetchUserGaji(int userId) async {
+    try {
+      final response = await _dio.get('/gaji/user/$userId');
+      final data = response.data['data'] ?? response.data;
+
+      if (data is Map<String, dynamic>) {
+        return UserGajiDetail.fromJson(data);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// GET /gaji/all
+  /// Get salary list for all users
+  Future<List<UserGajiListItem>> fetchAllUserGaji() async {
+    try {
+      final response = await _dio.get('/gaji/all');
+      final data = response.data['data'] ?? response.data;
+
+      if (data is List) {
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(UserGajiListItem.fromJson)
+            .toList();
+      }
+      return const [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // USER MANAGEMENT ENDPOINTS (authRoute.js)
+  // ═══════════════════════════════════════════════════════════
+
+  /// GET /auth/users
+  /// Get all users
+  Future<List<User>> getUsers() async {
+    try {
+      final response = await _dio.get('/auth/users');
+      final data = response.data['data'] ?? response.data;
+
+      if (data is List) {
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(User.fromJson)
+            .toList();
+      }
+      return const [];
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// PUT /auth/user/:id
+  /// Update user
+  Future<User> updateUser(
+    int id, {
+    String? nama,
+    String? email,
+    String? password,
+    int? roleId,
+    double? gajiPerJam,
+  }) async {
+    try {
+      final response = await _dio.put(
+        '/auth/user/$id',
+        data: {
+          if (nama != null) 'nama': nama,
+          if (email != null) 'email': email,
+          if (password != null) 'password': password,
+          if (roleId != null) 'roleId': roleId,
+          if (gajiPerJam != null) 'gajiPerJam': gajiPerJam,
+        },
+      );
+
+      final data = response.data['data'] ?? response.data;
+      return User.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw Exception(_extractMessage(e));
+    }
+  }
+
+  /// DELETE /auth/user/:id
+  /// Delete user
+  Future<void> deleteUser(int id) async {
+    try {
+      await _dio.delete('/auth/user/$id');
+    } on DioException catch (e) {
+      throw Exception(_extractMessage(e));
+    }
+  }
+
+  // =============================================================
+  // Helpers
+  // =============================================================
+  String _extractMessage(DioException e) {
+    final d = e.response?.data;
+    if (d is Map && d['message'] != null) {
+      return d['message'].toString();
+    }
+    return e.message ?? 'Network error';
+  }
 }
