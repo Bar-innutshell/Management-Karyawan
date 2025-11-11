@@ -17,6 +17,7 @@ Dokumentasi ini berisi API reference, aturan khusus (mis. field shift), panduan 
 
 ### Setup & Onboarding
 - **[SETUP.md](SETUP.md)** — Panduan setup lengkap untuk teammate baru
+- **[🔄 SYNC-DATABASE.md](SYNC-DATABASE.md)** — ⭐ **PENTING!** Sinkronisasi database dengan tim
 - **[QUICK-FIX.md](QUICK-FIX.md)** — Quick fixes untuk masalah umum
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — Troubleshooting panduan komprehensif
 

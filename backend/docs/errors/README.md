@@ -31,7 +31,27 @@ Error: P1001: Can't reach database server at localhost:1433
 Foreign key constraint violated on the constraint: 'User_roleId_fkey'
 ```
 **Penyebab:** Database belum di-seed, tabel `Role` kosong, tidak ada roleId yang valid  
-**Solusi:** Jalankan `npm run db:seed` untuk create roles default
+**Solusi:** Jalankan `npx prisma db seed` untuk create roles default
+
+---
+
+#### [ERROR-SEED-ABSENSI.md](ERROR-SEED-ABSENSI.md) - Unknown Argument jamMulaiShift 🆕 ⚠️
+```
+Unknown argument jamMulaiShift. Available options are marked with ?.
+```
+**Penyebab:** Schema database tidak sync dengan repository (beda field)  
+**Solusi:** ⭐ **[SYNC DATABASE](../SYNC-DATABASE.md)** - Reset database dengan `npx prisma db push --force-reset`
+**Penyebab:** Schema Prisma tidak sync dengan seeder, field structure berbeda  
+**Solusi:** Pull schema terbaru, push ke database, atau reset database
+
+---
+
+#### [FIX-CREATEDAT-ERROR.md](FIX-CREATEDAT-ERROR.md) - Column createdAt Does Not Exist 🔥 HOT
+```
+The column createdAt does not exist in the current database.
+```
+**Penyebab:** Database belum punya kolom `createdAt` dan `updatedAt` setelah `npx prisma db push`  
+**Solusi:** Jalankan `sqlcmd -i docs/tools/add-timestamps-all-tables.sql`
 
 ---
 

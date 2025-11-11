@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../auth/controllers/controller.dart';
+import '../../../core/config/routes.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -30,15 +31,15 @@ class DashboardScreen extends StatelessWidget {
       children: [
         ListTile(
           title: const Text('Manage Users'),
-          onTap: () => Get.toNamed('/admin_panel'), // Placeholder
+          onTap: () => Get.toNamed(Routes.manageUser),
         ),
         ListTile(
           title: const Text('Manage Schedules'),
-          onTap: () => Get.toNamed('/schedule'), // Placeholder
+          onTap: () => Get.toNamed(Routes.manageSchedule),
         ),
         ListTile(
           title: const Text('View Reports'),
-          onTap: () => Get.toNamed('/reporting'), // Placeholder
+          onTap: () => Get.toNamed(Routes.manageReport),
         ),
       ],
     );
