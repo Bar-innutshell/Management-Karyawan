@@ -1,0 +1,176 @@
+=================================================================
+⚠️ BREAKING CHANGES - VERSION 0.4.0
+=================================================================
+
+## 🔴 ENDPOINT YANG DIHAPUS:
+
+### 1. POST /auth/register - TIDAK LAGI TERSEDIA ❌
+**Alasan:** Hanya admin yang boleh create akun karyawan
+
+**Sebelum:**
+```
+POST /auth/register
+{
+  "nama": "User Baru",
+  "email": "user@restoran.com",
+  "password": "password123",
+  "roleId": 4
+}
+```
+
+**Sekarang:** Gunakan endpoint admin
+```
+POST /users (Admin only)
+Authorization: Bearer <admin_token>
+{
+  "nama": "User Baru",
+  "email": "user@restoran.com",
+  "password": "password123",
+  "roleId": 4,
+  "gajiPerJam": 20000
+}
+```
+
+### 2. Shift CRUD - TIDAK LAGI TERSEDIA ❌
+**Alasan:** Shift adalah template tetap (Pagi & Sore)
+
+**Disabled:**
+- POST /shifts - Create shift baru
+- PUT /shifts/:id - Update shift
+- DELETE /shifts/:id - Delete shift
+
+**Masih Tersedia:**
+- GET /shifts - List semua shift (2 template)
+- GET /shifts/:id - Detail shift
+
+=================================================================
+✅ SHIFT TEMPLATE (TETAP)
+=================================================================
+
+Sistem sekarang punya 2 shift tetap yang di-seed otomatis:
+
+╔══════════════════════════════════════════════════════════════╗
+║  SHIFT PAGI                                                  ║
+║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+║  Jam Mulai    : 09:00                                        ║
+║  Jam Selesai  : 15:00                                        ║
+║  Durasi       : 6 jam                                        ║
+║  Hari Kerja   : Senin - Jumat (20 hari/bulan)               ║
+╚══════════════════════════════════════════════════════════════╝
+
+╔══════════════════════════════════════════════════════════════╗
+║  SHIFT SORE                                                  ║
+║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
+║  Jam Mulai    : 15:00                                        ║
+║  Jam Selesai  : 21:00                                        ║
+║  Durasi       : 6 jam                                        ║
+║  Hari Kerja   : Senin - Jumat (20 hari/bulan)               ║
+╚══════════════════════════════════════════════════════════════╝
+
+=================================================================
+📋 MIGRATION STEPS
+=================================================================
+
+1. Update Backend Code:
+   git pull
+
+2. Sync Database:
+   cd backend
+   npx prisma db push
+   npx prisma generate
+
+3. Seed Shift Templates:
+   npx prisma db seed
+
+4. Test Backend:
+   node index.js
+   
+5. Verify:
+   GET /shifts → Harus return 2 shift (Pagi & Sore)
+   POST /auth/register → Harus 404 (endpoint dihapus)
+
+=================================================================
+🔧 FRONTEND UPDATES REQUIRED
+=================================================================
+
+### 1. Hapus Registration Feature ❌
+- [ ] Hapus screen/page registration
+- [ ] Hapus form register
+- [ ] Update navigation (hapus link ke register)
+- [ ] Update authentication flow (hanya login)
+
+### 2. Update User Management ✅
+- [ ] Admin screen: Tambah form create user
+- [ ] Gunakan endpoint POST /users (bukan /auth/register)
+- [ ] Tambahkan field gajiPerJam di form
+
+### 3. Update Shift Management 🔄
+- [ ] Hapus form create shift
+- [ ] Hapus form edit shift
+- [ ] Hapus button delete shift
+- [ ] Shift dropdown: Ambil dari GET /shifts (read-only)
+- [ ] Form absensi: Auto-fill jam berdasarkan shift yang dipilih
+
+=================================================================
+📖 DOKUMENTASI
+=================================================================
+
+API Documentation:
+- docs/API.md - Updated (register & shift changes)
+- docs/API-USER.md - No changes
+- docs/API-SHIFT.md - Rewritten (template only)
+- docs/CHANGELOG.md - Version 0.4.0 changes
+
+Quick Reference:
+- Shift Template: Pagi (09:00-15:00), Sore (15:00-21:00)
+- Hari Kerja: 20 hari/bulan (Senin-Jumat)
+- User Creation: Hanya via POST /users (Admin only)
+
+=================================================================
+💡 TIPS
+=================================================================
+
+1. Login Admin:
+   POST /auth/login
+   {
+     "email": "admin@restoran.com",
+     "password": "admin123"
+   }
+
+2. Get Shift List (untuk dropdown):
+   GET /shifts
+   Authorization: Bearer <token>
+   
+   Response: 2 shift (Pagi & Sore)
+
+3. Create Karyawan Baru (Admin only):
+   POST /users
+   Authorization: Bearer <admin_token>
+   {
+     "nama": "Karyawan Baru",
+     "email": "karyawan@restoran.com",
+     "password": "password123",
+     "roleId": 4,
+     "gajiPerJam": 20000
+   }
+
+=================================================================
+🆘 TROUBLESHOOTING
+=================================================================
+
+Q: Register endpoint return 404?
+A: Normal! Endpoint sudah dihapus. Gunakan POST /users.
+
+Q: POST /shifts return 404?
+A: Normal! Shift CRUD sudah disabled. Shift adalah template.
+
+Q: Bagaimana cara ubah jam shift?
+A: Edit backend/prisma/seed.js, lalu npx prisma db seed.
+
+Q: Bagaimana cara tambah shift baru (misal: Malam)?
+A: Edit backend/prisma/seed.js, tambah di shiftsData, seed ulang.
+
+=================================================================
+
+Update: 11 November 2025
+Version: 0.4.0

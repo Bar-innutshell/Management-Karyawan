@@ -5,6 +5,42 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
+  // ==================== SHIFTS (TEMPLATE) ====================
+  console.log('\n📌 Creating shift templates...');
+  
+  const shiftsData = [
+    {
+      nama: 'Pagi',
+      jamMulai: '09:00',
+      jamSelesai: '15:00',
+      deskripsi: 'Shift pagi - Senin sampai Jumat (20 hari/bulan)',
+      aktif: true
+    },
+    {
+      nama: 'Sore',
+      jamMulai: '15:00',
+      jamSelesai: '21:00',
+      deskripsi: 'Shift sore - Senin sampai Jumat (20 hari/bulan)',
+      aktif: true
+    }
+  ];
+
+  const shifts = {};
+  for (const shiftData of shiftsData) {
+    const shift = await prisma.shift.upsert({
+      where: { nama: shiftData.nama },
+      update: {
+        jamMulai: shiftData.jamMulai,
+        jamSelesai: shiftData.jamSelesai,
+        deskripsi: shiftData.deskripsi,
+        aktif: shiftData.aktif
+      },
+      create: shiftData
+    });
+    shifts[shiftData.nama] = shift;
+    console.log(`   ✅ ${shiftData.nama} (${shiftData.jamMulai} - ${shiftData.jamSelesai})`);
+  }
+
   // ==================== ROLES ====================
   console.log('\n📌 Creating roles...');
   
@@ -58,49 +94,57 @@ async function main() {
       nama: 'Ahmad Rizki',
       email: 'admin@restoran.com',
       password: 'admin123',
-      role: 'Admin'
+      role: 'Admin',
+      shift: null  // Admin tidak ada shift
     },
     {
       nama: 'Siti Nurhaliza',
       email: 'siti.cashier@restoran.com',
       password: 'siti123',
-      role: 'Cashier'
+      role: 'Cashier',
+      shift: 'Pagi'  // Kasir shift pagi
     },
     {
       nama: 'Budi Santoso',
       email: 'budi.chef@restoran.com',
       password: 'budi123',
-      role: 'Chef'
+      role: 'Chef',
+      shift: 'Pagi'  // Chef shift pagi
     },
     {
       nama: 'Dewi Lestari',
       email: 'dewi.waiter@restoran.com',
       password: 'dewi123',
-      role: 'Waiter'
+      role: 'Waiter',
+      shift: 'Pagi'  // Pelayan shift pagi
     },
     {
       nama: 'Eko Prasetyo',
       email: 'eko.employee@restoran.com',
       password: 'eko123',
-      role: 'Employee'
+      role: 'Employee',
+      shift: 'Sore'  // Karyawan shift sore
     },
     {
       nama: 'Fitri Handayani',
       email: 'fitri.waiter@restoran.com',
       password: 'fitri123',
-      role: 'Waiter'
+      role: 'Waiter',
+      shift: 'Sore'  // Pelayan shift sore
     },
     {
       nama: 'Gilang Ramadhan',
       email: 'gilang.cashier@restoran.com',
       password: 'gilang123',
-      role: 'Cashier'
+      role: 'Cashier',
+      shift: 'Sore'  // Kasir shift sore
     },
     {
       nama: 'Hana Safitri',
       email: 'hana.chef@restoran.com',
       password: 'hana123',
-      role: 'Chef'
+      role: 'Chef',
+      shift: 'Sore'  // Chef shift sore
     }
   ];
 
@@ -112,17 +156,20 @@ async function main() {
       update: {
         nama: userData.nama,
         password: hashedPassword,
-        roleId: roles[userData.role].id
+        roleId: roles[userData.role].id,
+        shift: userData.shift
       },
       create: {
         nama: userData.nama,
         email: userData.email,
         password: hashedPassword,
-        roleId: roles[userData.role].id
+        roleId: roles[userData.role].id,
+        shift: userData.shift
       }
     });
     users.push(user);
-    console.log(`   ✅ ${userData.nama} (${userData.role}) - ${userData.email}`);
+    const shiftText = userData.shift ? `Shift: ${userData.shift}` : 'No Shift';
+    console.log(`   ✅ ${userData.nama} (${userData.role}) - ${shiftText} - ${userData.email}`);
   }
 
   // ==================== ABSENSI HISTORY ====================
@@ -297,7 +344,8 @@ async function main() {
   console.log('─────────────────────────────────────────────────');
   for (let i = 0; i < users.length; i++) {
     const userData = usersData[i];
-    console.log(`${i + 1}. ${userData.nama.padEnd(20)} | ${userData.role.padEnd(10)} | ${userData.email}`);
+    const shiftInfo = userData.shift ? `Shift: ${userData.shift}` : 'No Shift   ';
+    console.log(`${i + 1}. ${userData.nama.padEnd(20)} | ${userData.role.padEnd(10)} | ${shiftInfo} | ${userData.email}`);
     console.log(`   Password: ${userData.password}`);
   }
   

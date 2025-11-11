@@ -8,6 +8,8 @@ Dokumentasi ini berisi API reference, aturan khusus (mis. field shift), panduan 
 
 ### API & Development
 - **[API.md](API.md)** — Kontrak endpoint dan contoh request/response
+- **[API-USER.md](API-USER.md)** — 👥 CRUD User Management (Admin only)
+- **[API-SHIFT.md](API-SHIFT.md)** — ⏰ CRUD Shift Management (Admin only)
 - **[POSTMAN.md](POSTMAN.md)** — Panduan testing dengan Postman
 - **[SHIFT.md](SHIFT.md)** — Penjelasan field `shift` (nilai: `pagi`, `siang`, `malam`)
 - **[LAPORAN-GAJI-ABSENSI.md](LAPORAN-GAJI-ABSENSI.md)** — Penjelasan sistem laporan gaji dan absensi

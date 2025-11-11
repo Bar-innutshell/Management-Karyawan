@@ -27,6 +27,7 @@ model User {
   createdAt        DateTime           @default(now())
   gajiPerJam       Float              @default(0)
   updatedAt        DateTime           @default(now())
+  shift            String?            // Shift user: "Pagi" atau "Sore" (nullable, di-assign admin)
   absensi          Absensi[]
   jadwal           Jadwal[]
   laporanPemasukan LaporanPemasukan[]
@@ -91,4 +92,15 @@ model LaporanPemasukan {
   shift           String
   userId          Int
   user            User     @relation(fields: [userId], references: [id])
+}
+
+model Shift {
+  id          Int      @id @default(autoincrement())
+  nama        String   @unique
+  jamMulai    String
+  jamSelesai  String
+  deskripsi   String?
+  aktif       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }

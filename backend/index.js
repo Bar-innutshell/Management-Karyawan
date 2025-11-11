@@ -3,6 +3,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/authRoute");
 const roleRoutes = require("./routes/roleRoute");
+const userRoutes = require("./routes/userRoute");
+const shiftRoutes = require("./routes/shiftRoute");
 const pemasukkanRoute = require("./routes/pemasukkanRoute");
 const laporanRoute = require("./routes/laporanRoute");
 const gajiRoute = require("./routes/gajiRoute");
@@ -49,6 +51,8 @@ app.get("/db/ping", async (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/roles", roleRoutes);
+app.use("/users", userRoutes);
+app.use("/shifts", shiftRoutes);
 app.use("/pemasukkan", pemasukkanRoute);
 app.use("/laporan", laporanRoute);
 app.use("/gaji", gajiRoute);

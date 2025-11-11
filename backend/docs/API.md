@@ -7,6 +7,8 @@ Catatan: Tambahkan endpoint baru di dokumen ini setiap menambah route di `backen
 ## 📚 Dokumentasi Lengkap
 
 ### Quick Links
+- **[👥 User Management (Admin)](./API-USER.md)** - CRUD user, manajemen karyawan
+- **[⏰ Shift Management (Admin)](./API-SHIFT.md)** - CRUD shift kerja (Pagi, Siang, Malam)
 - **[Laporan, Gaji & Absensi API](./LAPORAN-GAJI-ABSENSI.md)** - Dokumentasi lengkap untuk:
   - 📊 Laporan Pemasukkan (Admin)
   - 💰 Manajemen Gaji (Admin)
@@ -21,8 +23,22 @@ Catatan: Tambahkan endpoint baru di dokumen ini setiap menambah route di `backen
 ## 📋 Endpoint Overview
 
 ### Authentication
-- `POST /auth/register` - Registrasi user baru
-- `POST /auth/login` - Login user
+- `POST /auth/login` - Login user (register dihapus, hanya admin bisa create user)
+
+### User Management (Admin Only) 👥
+- `GET /users` - List semua users dengan filter
+- `GET /users/:id` - Get user by ID
+- `POST /users` - Buat user baru (Admin only) - **CARA SATU-SATUNYA buat akun karyawan**
+- `PUT /users/:id` - Update user (Admin only)
+- `DELETE /users/:id` - Hapus user (Admin only)
+- **📖 [Full Documentation](./API-USER.md)**
+
+### Shift Management (Read-Only) ⏰
+- `GET /shifts` - List semua shifts (All users)
+- `GET /shifts/:id` - Get shift by ID (All users)
+- **Note:** Shift adalah **TEMPLATE** (Pagi: 09:00-15:00, Sore: 15:00-21:00)
+- **Tidak ada CRUD** - Shift di-seed otomatis, tidak bisa diubah via API
+- **📖 [Full Documentation](./API-SHIFT.md)**
 
 ### Role Management (Admin Only)
 - `GET /roles` - List semua roles
@@ -65,40 +81,10 @@ Catatan: Tambahkan endpoint baru di dokumen ini setiap menambah route di `backen
 
 ## 🔐 Authentication
 
-### POST /auth/register
-Registrasi user baru.
+## 🔐 Authentication
 
-**Request Body:**
-```json
-{
-  "nama": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "roleId": 1
-}
-```
-
-**Response 201 (Created):**
-```json
-{
-  "message": "User berhasil terdaftar",
-  "user": {
-    "id": 1,
-    "nama": "John Doe",
-    "email": "john@example.com",
-    "roleId": 1
-  }
-}
-```
-
-**Response 409 (Conflict):**
-```json
-{
-  "message": "Email sudah terdaftar."
-}
-```
-
----
+**PENTING:** Endpoint `/auth/register` sudah **DIHAPUS**. 
+Hanya Admin yang bisa membuat akun karyawan melalui endpoint `POST /users`.
 
 ### POST /auth/login
 Login user.
@@ -113,6 +99,27 @@ Login user.
 
 **Response 200 (OK):**
 ```json
+{
+  "message": "Login berhasil",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Response 401 (Unauthorized):**
+```json
+{
+  "message": "Password salah."
+}
+```
+
+**Response 404 (Not Found):**
+```json
+{
+  "message": "Email tidak ditemukan."
+}
+```
+
+---
 {
   "message": "Login berhasil",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
