@@ -52,3 +52,12 @@ frontend/.flutter-plugins
 frontend/.flutter-plugins-dependencies
 frontend/.packages
 frontend/pubspec.lock
+
+# Flutter generated files (auto-generated, should not be committed)
+frontend/**/generated_plugin_registrant.cc
+frontend/**/generated_plugin_registrant.h
+frontend/**/generated_plugin_registrant.dart
+frontend/**/GeneratedPluginRegistrant.swift
+frontend/**/GeneratedPluginRegistrant.m
+frontend/**/generated_plugins.cmake
+frontend/**/ephemeral/
