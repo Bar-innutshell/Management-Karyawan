@@ -1,44 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/config/routes.dart';
+import '../../auth/controllers/controller.dart';
 
 class AdminPanelScreen extends StatelessWidget {
   const AdminPanelScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final AuthController auth = Get.isRegistered<AuthController>()
+        ? Get.find<AuthController>()
+        : Get.put(AuthController());
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard')),
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
+        actions: [
+          IconButton(
+            tooltip: 'Logout',
+            onPressed: auth.logout,
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             ListTile(
-              title: const Text('Informasi Karyawan'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => Get.toNamed(Routes.userList),
+              leading: const Icon(Icons.group_outlined),
+              title: const Text('Register User'),
+              subtitle: const Text(
+                'Tambahkan akun baru dan tentukan role pengguna',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.toNamed(Routes.registerUser),
             ),
+            const Divider(),
             ListTile(
+              leading: const Icon(Icons.payments_outlined),
               title: const Text('Informasi Gaji'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              subtitle: const Text('Tinjau dan atur data penggajian'),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () => Get.toNamed(Routes.salaryInfo),
             ),
-            // TODO: Schedule feature - waiting for backend implementation
-            // ListTile(
-            //   title: const Text('Manage Jadwal'),
-            //   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            //   onTap: () => Get.toNamed(Routes.manageSchedule),
-            // ),
+            const Divider(),
             ListTile(
-              title: const Text('Manage Roles'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // TODO: Navigate to roles
-              },
-            ),
-            ListTile(
+              leading: const Icon(Icons.insert_chart_outlined),
               title: const Text('View Reports'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              subtitle: const Text('Analisis laporan pemasukan karyawan'),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () => Get.toNamed(Routes.adminReport),
             ),
           ],

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../controllers/controller.dart';
-import '../../../../core/models/report.dart';
+
+import '../controllers/employee_report_controller.dart';
 
 class LaporanInputScreen extends StatefulWidget {
   final String user;
@@ -18,157 +20,152 @@ class LaporanInputScreen extends StatefulWidget {
 }
 
 class _LaporanInputScreenState extends State<LaporanInputScreen> {
-  final ReportController _controller = ReportController();
-  final TextEditingController _jumlahController = TextEditingController();
-  String _selectedShift = '';
-  bool _isLoading = false;
+  static const _controllerTag = 'employee-report-controller';
+  late final EmployeeReportController _controller;
+  final TextEditingController _amountController = TextEditingController();
 
-  Future<void> _simpanLaporan() async {
-    final jumlah = double.tryParse(_jumlahController.text);
-    if (jumlah == null || jumlah <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan jumlah pemasukan yang valid')),
-      );
-      return;
-    }
-
-    if (_selectedShift.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih shift terlebih dahulu')),
-      );
-      return;
-    }
-
-    final laporan = Report(
-      jumlahPemasukan: jumlah,
-      tanggalLaporan: DateTime.now(),
-      shift: _selectedShift,
-      user: widget.user,
-      userId: widget.userId,
-    );
-
-    setState(() => _isLoading = true);
-
-    final success = await _controller.addReport(laporan);
-
-    setState(() => _isLoading = false);
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Laporan berhasil disimpan!')),
-      );
-      _jumlahController.clear();
-      setState(() => _selectedShift = '');
+  @override
+  void initState() {
+    super.initState();
+    if (Get.isRegistered<EmployeeReportController>(tag: _controllerTag)) {
+      _controller = Get.find<EmployeeReportController>(tag: _controllerTag);
     } else {
+      _controller = Get.put(EmployeeReportController(), tag: _controllerTag);
+    }
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    if (Get.isRegistered<EmployeeReportController>(tag: _controllerTag)) {
+      Get.delete<EmployeeReportController>(tag: _controllerTag, force: true);
+    }
+    super.dispose();
+  }
+
+  Future<void> _handleSubmit() async {
+    final raw = _amountController.text.trim();
+    if (raw.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('❌ Gagal menyimpan laporan')),
+        const SnackBar(
+          content: Text('Masukkan nominal pemasukan terlebih dahulu.'),
+        ),
       );
+      return;
+    }
+
+    final amount = int.tryParse(raw);
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nominal harus berupa angka positif.')),
+      );
+      return;
+    }
+
+    try {
+      await _controller.submit(amount: amount);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pemasukan harian tersimpan.')),
+      );
+      _amountController.clear();
+    } catch (e) {
+      if (!mounted) return;
+      final message = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $message')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final tanggal = DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(DateTime.now());
+    final now = DateTime.now();
+    final tanggal = DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(now);
+    final autoShift = _controller.deriveShift(now);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Input Laporan Pemasukan"),
+        title: const Text('Input Pemasukan Harian'),
         centerTitle: true,
-        backgroundColor: Colors.teal,
-        elevation: 2,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(20),
         child: Card(
           elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Column(
+                Text(
+                  'Halo, ${widget.user}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(tanggal, style: const TextStyle(color: Colors.grey)),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.teal.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
                     children: [
-                      const Icon(Icons.point_of_sale,
-                          size: 70, color: Colors.teal),
-                      const SizedBox(height: 10),
-                      Text(
-                        "Laporan Kasir",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        tanggal,
-                        style: const TextStyle(color: Colors.grey, fontSize: 16),
+                      const Icon(Icons.access_time, color: Colors.teal),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Shift otomatis: $autoShift',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
-
-                // Input jumlah pemasukan
+                const SizedBox(height: 24),
                 TextField(
-                  controller: _jumlahController,
+                  controller: _amountController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
-                    labelText: "Jumlah Pemasukan (Rp)",
-                    prefixIcon: const Icon(Icons.attach_money, color: Colors.teal),
-                    filled: true,
-                    fillColor: Colors.grey[100],
+                    labelText: 'Nominal pemasukan (Rp)',
+                    prefixIcon: const Icon(Icons.attach_money),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Dropdown shift
-                DropdownButtonFormField<String>(
-                  value: _selectedShift.isEmpty ? null : _selectedShift,
-                  items: const [
-                    DropdownMenuItem(value: 'Pagi', child: Text("Shift Pagi")),
-                    DropdownMenuItem(value: 'Siang', child: Text("Shift Siang")),
-                    DropdownMenuItem(value: 'Malam', child: Text("Shift Malam")),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedShift = val);
-                  },
-                  decoration: InputDecoration(
-                    labelText: "Pilih Shift",
-                    prefixIcon:
-                        const Icon(Icons.access_time, color: Colors.teal),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // Tombol simpan
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _simpanLaporan,
-                    icon: const Icon(Icons.save),
-                    label: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Simpan Laporan",
-                            style: TextStyle(fontSize: 18),
-                          ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 24),
+                Obx(
+                  () => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _controller.isSubmitting.value
+                          ? null
+                          : _handleSubmit,
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: _controller.isSubmitting.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Kirim Pemasukan'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),

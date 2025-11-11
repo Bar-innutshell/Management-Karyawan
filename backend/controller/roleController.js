@@ -6,7 +6,7 @@ exports.getAllRoles = async (req, res) => {
       select: {
         id: true,
         nama: true,
-        gajiPokok: true,
+        gajiPokokBulanan: true,
         deskripsi: true,
         createdAt: true,
         updatedAt: true,
@@ -57,7 +57,7 @@ exports.getRoleById = async (req, res) => {
 };
 
 exports.createRole = async (req, res) => {
-  const { nama, gajiPokok, deskripsi } = req.body;
+  const { nama, gajiPokokBulanan, deskripsi } = req.body;
 
   try {
     if (!nama) {
@@ -75,7 +75,7 @@ exports.createRole = async (req, res) => {
     const newRole = await prisma.role.create({
       data: {
         nama: nama,
-        gajiPokok: parseFloat(gajiPokok) || 0,
+        gajiPokokBulanan: parseFloat(gajiPokokBulanan) || 0,
         deskripsi: deskripsi || null
       }
     });
@@ -91,7 +91,7 @@ exports.createRole = async (req, res) => {
 
 exports.updateRole = async (req, res) => {
   const { id } = req.params;
-  const { nama, gajiPokok, deskripsi } = req.body;
+  const { nama, gajiPokokBulanan, deskripsi } = req.body;
 
   try {
     const roleExists = await prisma.role.findUnique({
@@ -116,7 +116,7 @@ exports.updateRole = async (req, res) => {
       where: { id: parseInt(id) },
       data: {
         ...(nama && { nama }),
-        ...(gajiPokok !== undefined && { gajiPokok: parseFloat(gajiPokok) }),
+        ...(gajiPokokBulanan !== undefined && { gajiPokokBulanan: parseFloat(gajiPokokBulanan) }),
         ...(deskripsi !== undefined && { deskripsi })
       }
     });

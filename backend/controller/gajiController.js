@@ -29,7 +29,7 @@ exports.setGajiPerJam = async (req, res) => {
         role: {
           select: {
             nama: true,
-            gajiPokok: true,
+            gajiPokokBulanan: true,
           },
         },
       },
@@ -73,7 +73,7 @@ exports.setGajiPerJam = async (req, res) => {
  * Menghitung gaji per jam dari gaji pokok role
  * Formula: Gaji Pokok ÷ 20 hari ÷ 6 jam = Gaji Per Jam
  */
-exports.hitungGajiDariGajiPokok = async (req, res) => {
+exports.hitungGajiDariGajiPokokBulanan = async (req, res) => {
   try {
     const { userId } = req.body;
 
@@ -97,8 +97,12 @@ exports.hitungGajiDariGajiPokok = async (req, res) => {
       });
     }
 
+    const gajiPokok = user.role?.gajiPokokBulanan;
+    if (!gajiPokok) {
+      return res.status(400).json({ message: 'Role belum memiliki gaji pokok bulanan.' });
+    }
     // Hitung gaji per jam dari gaji pokok role
-    const gajiPerJam = user.role.gajiPokokBulanan / 20 / 6;
+    const gajiPerJam = gajiPokok / 20 / 6;
 
     // Update gaji per jam user
     const updatedUser = await prisma.user.update({
@@ -150,7 +154,7 @@ exports.getUserGaji = async (req, res) => {
         role: {
           select: {
             nama: true,
-            gajiPokok: true,
+            gajiPokokBulanan: true,
           },
         },
       },
@@ -202,7 +206,7 @@ exports.getAllUserGaji = async (req, res) => {
         role: {
           select: {
             nama: true,
-            gajiPokok: true,
+            gajiPokokBulanan: true,
           },
         },
       },
@@ -216,13 +220,13 @@ exports.getAllUserGaji = async (req, res) => {
         id: user.id,
         nama: user.nama,
         email: user.email,
-        role: user.role.nama,
+        role: user.role?.nama ?? '-',
       },
       gaji: {
-        gajiPokokBulanan: user.role.gajiPokokBulanan,
-        gajiPerJam: user.gajiPerJam,
-        gajiHarian: user.gajiPerJam * 6,
-        gajiBulanan: user.gajiPerJam * 6 * 20,
+        gajiPokokBulanan: user.role?.gajiPokokBulanan ?? 0,
+        gajiPerJam: user.gajiPerJam ?? 0,
+        gajiHarian: (user.gajiPerJam ?? 0) * 6,
+        gajiBulanan: (user.gajiPerJam ?? 0) * 6 * 20,
       },
     }));
 
